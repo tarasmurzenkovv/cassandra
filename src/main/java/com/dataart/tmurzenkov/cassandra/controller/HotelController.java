@@ -43,7 +43,7 @@ public class HotelController {
      * @return list of the {@link Hotel}
      */
     @ApiOperation(value = "Finds all hotels in the city.", notes = "Finds all hotels in the city. ")
-    @RequestMapping(path = "/api/get/{city}")
+    @RequestMapping(path = "/api/get/{city}", method = RequestMethod.GET)
     public List<Resource<Hotel>> getAllHotelsInTheCity(
             @ApiParam(value = "Name of the city to where to search", required = true)
             @PathVariable("city") String city) {

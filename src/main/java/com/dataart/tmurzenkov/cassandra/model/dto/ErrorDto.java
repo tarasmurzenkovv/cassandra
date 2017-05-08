@@ -13,6 +13,7 @@ public class ErrorDto {
      * Constructs DTO from {@link RuntimeException}.
      *
      * @param e {@link RuntimeException}
+     * @param exceptionDescription {@link String} short camel case exception description.
      */
     public ErrorDto(RuntimeException e, String exceptionDescription) {
         this.exceptionMessage = e.getMessage();

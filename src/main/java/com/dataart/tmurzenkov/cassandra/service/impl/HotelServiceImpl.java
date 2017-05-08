@@ -1,7 +1,9 @@
 package com.dataart.tmurzenkov.cassandra.service.impl;
 
+import com.dataart.tmurzenkov.cassandra.dao.HotelByCityDao;
 import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.Hotel;
+import com.dataart.tmurzenkov.cassandra.model.entity.HotelByCity;
 import com.dataart.tmurzenkov.cassandra.service.HotelService;
 import com.dataart.tmurzenkov.cassandra.service.Validator;
 import org.slf4j.Logger;
@@ -10,8 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Service to manage {@link Hotel}.
@@ -24,6 +29,8 @@ public class HotelServiceImpl implements HotelService {
     @Autowired
     private HotelDao hotelDao;
     @Autowired
+    private HotelByCityDao hotelByCityDao;
+    @Autowired
     private Validator<Hotel> validatorService;
 
     /**
@@ -33,9 +40,11 @@ public class HotelServiceImpl implements HotelService {
      * @return {@link Hotel}
      */
     public Hotel addNewHotelToTheSystem(Hotel hotel) {
-        LOGGER.info("Going to save the following entity into the DB: '%s'", hotel);
+        LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
         validatorService.withRepository(hotelDao).doValidate(hotel);
-        return hotelDao.save(hotel);
+        final Hotel save = hotelDao.save(hotel);
+        hotelDao.insertIntoHotelByCity(save.getId(), save.getAddress().getCity());
+        return save;
     }
 
     @Override
@@ -43,6 +52,7 @@ public class HotelServiceImpl implements HotelService {
         if (isEmpty(city)) {
             throw new IllegalArgumentException("Cannot find the hotels for the empty city name");
         }
-        return hotelDao.findAllHotelsInTheCity(city);
+        List<UUID> hotelIds = hotelByCityDao.findAllHotelIdsInTheCity(city).stream().map(HotelByCity::getHotelId).collect(toList());
+        return hotelDao.findAllHotelsByTheirIds(hotelIds);
     }
 }

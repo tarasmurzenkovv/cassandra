@@ -7,12 +7,14 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.cassandra.config.CassandraClusterFactoryBean;
 import org.springframework.data.cassandra.config.CassandraSessionFactoryBean;
 import org.springframework.data.cassandra.config.SchemaAction;
+import org.springframework.data.cassandra.config.java.AbstractCassandraConfiguration;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.convert.MappingCassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.mapping.BasicCassandraMappingContext;
 import org.springframework.data.cassandra.mapping.CassandraMappingContext;
+import org.springframework.data.cassandra.mapping.SimpleUserTypeResolver;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
 /**
@@ -23,7 +25,7 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 @Configuration
 @PropertySource(value = {"classpath:/application.properties"})
 @EnableCassandraRepositories(basePackages = {"com.dataart.tmurzenkov.cassandra.dao"})
-public class CassandraConfiguration {
+public class CassandraConfiguration extends AbstractCassandraConfiguration {
     @Value("${cassandra.contactpoints}")
     private String contactPoints;
     @Value("${cassandra.port}")
@@ -38,10 +40,9 @@ public class CassandraConfiguration {
      */
     @Bean
     public CassandraClusterFactoryBean cluster() {
-        CassandraClusterFactoryBean cassandraClusterFactoryBean = new CassandraClusterFactoryBean();
-        cassandraClusterFactoryBean.setContactPoints(contactPoints);
-        cassandraClusterFactoryBean.setPort(port);
-        return cassandraClusterFactoryBean;
+        CassandraClusterFactoryBean cluster = new CassandraClusterFactoryBean();
+        cluster.setContactPoints(contactPoints);
+        return cluster;
     }
 
     /**
@@ -52,7 +53,9 @@ public class CassandraConfiguration {
      */
     @Bean
     public CassandraMappingContext mappingContext() {
-        return new BasicCassandraMappingContext();
+        BasicCassandraMappingContext mappingContext = new BasicCassandraMappingContext();
+        mappingContext.setUserTypeResolver(new SimpleUserTypeResolver(cluster().getObject(), keySpace));
+        return mappingContext;
     }
 
     /**
@@ -85,8 +88,8 @@ public class CassandraConfiguration {
      *
      * @return {@link CassandraOperations}
      */
-    @Bean
-    public CassandraOperations cassandraTemplate() {
-        return new CassandraTemplate(session().getObject());
+    @Override
+    protected String getKeyspaceName() {
+        return keySpace;
     }
 }

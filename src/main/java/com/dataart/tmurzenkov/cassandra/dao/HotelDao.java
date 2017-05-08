@@ -5,6 +5,7 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Cassandra Spring data repository to persists the {@link Hotel} entity.
@@ -14,11 +15,20 @@ import java.util.List;
  */
 public interface HotelDao extends CassandraRepository<Hotel> {
     /**
-     * Finds all {@link Hotel} for the given city name.
+     * Find all {@link Hotel} by the provided list of {@link UUID} their ids.
      *
-     * @param cityName {@link String}
+     * @param ids hotel id
      * @return {@link List} of {@link Hotel}
      */
-    @Query("select * from hotel where hotel_city in(?0)")
-    List<Hotel> findAllHotelsInTheCity(String cityName);
+    @Query("select * from hotels where hotel_id in (?0);")
+    List<Hotel> findAllHotelsByTheirIds(List<UUID> ids);
+
+    /**
+     * Insert new record in the table hotels_by_city.
+     *
+     * @param hotelId hotel id
+     * @param city    city name
+     */
+    @Query("insert into hotels_by_city (hotel_id, city) values (?0,?1);")
+    void insertIntoHotelByCity(UUID hotelId, String city);
 }

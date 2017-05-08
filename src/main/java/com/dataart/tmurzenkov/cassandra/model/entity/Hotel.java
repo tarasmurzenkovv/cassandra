@@ -1,7 +1,11 @@
 package com.dataart.tmurzenkov.cassandra.model.entity;
 
 import com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants;
+import com.datastax.driver.core.DataType;
+import com.datastax.driver.mapping.annotations.FrozenValue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.cassandra.core.PrimaryKeyType;
+import org.springframework.data.cassandra.mapping.CassandraType;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
@@ -10,44 +14,23 @@ import org.springframework.data.cassandra.repository.support.BasicMapId;
 
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants.ZEROS;
-import static com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants.FIRST;
-import static com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants.SECOND;
-import static com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants.THIRD;
-import static org.springframework.cassandra.core.Ordering.DESCENDING;
-import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
-import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
-
 /**
  * 'Hotel' cassandra entity.
- * <p>
- * Key points:
- * - it is sufficient to uniquely identify the hotel by cortege (hotel_name, hotel_address, hotel_city, hotel_country), thus
- * this cortege (along with {@link UUID id} -- partitioned key) will be used as the composite primary key;
- * - the partitioned key (how these entities are being distributes across cluster) is the type of {@link UUID};
- * - the clustered key is being presented by the cortege of (hotel_name, hotel_address, hotel_city, hotel_country);
- * - the clustered key cortege values are used in equals and hashcode methods;
- * - the order of appearance is the following: first will go hotel_name, then hotel_address, then hotel_city, then hotel_country;
  *
  * @author tmurzenkov
  * @see OrdinalConstants
  */
-@Table("hotel")
+@Table("hotels")
 public class Hotel implements BasicEntity {
-    @PrimaryKeyColumn(name = "hotel_id", type = PARTITIONED, ordering = DESCENDING)
+    @PrimaryKeyColumn(name = "hotel_id", ordinal = OrdinalConstants.ZEROS, type = PrimaryKeyType.PARTITIONED)
     private UUID id;
-    @PrimaryKeyColumn(name = "hotel_name", ordinal = ZEROS, type = CLUSTERED)
+    @Column(value = "name")
     private String name;
-    @PrimaryKeyColumn(name = "hotel_address", ordinal = FIRST, type = CLUSTERED)
-    private String address;
-    @PrimaryKeyColumn(name = "hotel_city", ordinal = SECOND, type = CLUSTERED)
-    private String city;
-    @PrimaryKeyColumn(name = "hotel_country", ordinal = THIRD, type = CLUSTERED)
-    private String country;
-    @Column("hotel_phone")
+    @Column(value = "phone")
     private String phone;
-    @Column("hotel_zip")
-    private String zip;
+    @CassandraType(type = DataType.Name.UDT, userTypeName = "address")
+    @FrozenValue
+    private Address address = new Address();
 
     /**
      * Constructor. Internally, it assigns random {@link UUID} to the entity partitioning id.
@@ -59,18 +42,16 @@ public class Hotel implements BasicEntity {
     @Override
     @JsonIgnore
     public MapId getCompositeId() {
-        return BasicMapId.id()
-                .with("id", this.getId())
-                .with("name", this.getName())
-                .with("address", this.getAddress())
-                .with("city", this.getCity())
-                .with("country", this.getCountry());
+        return new BasicMapId().with("id", this.id);
     }
 
-    @Override
     @JsonIgnore
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -81,30 +62,6 @@ public class Hotel implements BasicEntity {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getPhone() {
         return phone;
     }
@@ -113,12 +70,12 @@ public class Hotel implements BasicEntity {
         this.phone = phone;
     }
 
-    public String getZip() {
-        return zip;
+    public Address getAddress() {
+        return address;
     }
 
-    public void setZip(String zip) {
-        this.zip = zip;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     @Override
@@ -135,21 +92,17 @@ public class Hotel implements BasicEntity {
         if (name != null ? !name.equals(hotel.name) : hotel.name != null) {
             return false;
         }
-        if (address != null ? !address.equals(hotel.address) : hotel.address != null) {
+        if (phone != null ? !phone.equals(hotel.phone) : hotel.phone != null) {
             return false;
         }
-        if (city != null ? !city.equals(hotel.city) : hotel.city != null) {
-            return false;
-        }
-        return country != null ? country.equals(hotel.country) : hotel.country == null;
+        return address != null ? address.equals(hotel.address) : hotel.address == null;
     }
 
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (phone != null ? phone.hashCode() : 0);
         result = 31 * result + (address != null ? address.hashCode() : 0);
-        result = 31 * result + (city != null ? city.hashCode() : 0);
-        result = 31 * result + (country != null ? country.hashCode() : 0);
         return result;
     }
 
@@ -158,11 +111,8 @@ public class Hotel implements BasicEntity {
         return "Hotel{"
                 + "id=" + id
                 + ", name='" + name + '\''
-                + ", address='" + address + '\''
-                + ", city='" + city + '\''
-                + ", country='" + country + '\''
                 + ", phone='" + phone + '\''
-                + ", zip='" + zip + '\''
+                + ", address=" + address
                 + '}';
     }
 }

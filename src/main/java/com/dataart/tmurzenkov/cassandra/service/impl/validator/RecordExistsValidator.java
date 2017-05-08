@@ -21,6 +21,7 @@ public class RecordExistsValidator<T extends BasicEntity> implements Validator<T
     private CassandraRepository<T> cassandraRepository;
 
     @Override
+    @SuppressWarnings("unchecked")
     public RecordExistsValidator<T> withRepository(CassandraRepository cassandraRepository) {
         this.cassandraRepository = cassandraRepository;
         return this;

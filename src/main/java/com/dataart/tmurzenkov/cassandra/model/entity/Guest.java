@@ -33,7 +33,7 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
  * @see OrdinalConstants
  */
 @Table("guest")
-public class Guest implements BasicEntity {
+public class Guest {
     @PrimaryKeyColumn(name = "id", type = PARTITIONED, ordering = DESCENDING)
     private UUID id;
     @PrimaryKeyColumn(name = "guest_name", ordinal = FIRST, type = CLUSTERED, ordering = DESCENDING)
@@ -52,7 +52,6 @@ public class Guest implements BasicEntity {
         this.id = UUID.randomUUID();
     }
 
-    @Override
     @JsonIgnore
     public MapId getCompositeId() {
         return BasicMapId.id()
@@ -62,7 +61,6 @@ public class Guest implements BasicEntity {
                 .with("guestEmail", this.getGuestEmail());
     }
 
-    @Override
     @JsonIgnore
     public UUID getId() {
         return this.id;

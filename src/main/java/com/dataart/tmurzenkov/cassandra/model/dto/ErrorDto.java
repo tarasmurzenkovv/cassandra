@@ -1,9 +1,7 @@
-package com.dataart.tmurzenkov.cassandra.model;
-
-import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
+package com.dataart.tmurzenkov.cassandra.model.dto;
 
 /**
- * Dto to hold information about the exceptions/errors
+ * Dto to hold information about the exceptions/errors.
  *
  * @author tmurzenkov
  */
@@ -11,11 +9,29 @@ public class ErrorDto {
     private String exceptionMessage;
     private String exceptionDescription;
 
-    public ErrorDto(RecordExistsException e) {
+    /**
+     * Constructs DTO from {@link RuntimeException}.
+     *
+     * @param e {@link RuntimeException}
+     */
+    public ErrorDto(RuntimeException e, String exceptionDescription) {
         this.exceptionMessage = e.getMessage();
-        this.exceptionDescription = "RECORD_ALREADY_EXISTS";
+        this.exceptionDescription = exceptionDescription;
     }
 
-    public ErrorDto() {
+    public String getExceptionMessage() {
+        return exceptionMessage;
+    }
+
+    public void setExceptionMessage(String exceptionMessage) {
+        this.exceptionMessage = exceptionMessage;
+    }
+
+    public String getExceptionDescription() {
+        return exceptionDescription;
+    }
+
+    public void setExceptionDescription(String exceptionDescription) {
+        this.exceptionDescription = exceptionDescription;
     }
 }

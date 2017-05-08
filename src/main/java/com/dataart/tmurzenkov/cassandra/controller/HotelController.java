@@ -8,13 +8,15 @@ import com.wordnik.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -61,6 +63,7 @@ public class HotelController {
      */
     @ApiOperation(value = "Adds new hotel to the system.", notes = "Adds new hotel to the system and returns the location header. ")
     @RequestMapping(path = "/api/add/hotel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
     public Resource<Hotel> addHotel(
             @ApiParam(value = "Hotel dto. ", required = true)
             @RequestBody Hotel hotel) {

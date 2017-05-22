@@ -9,6 +9,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.LocalDateTime;
+
 /**
  * Swagger bean configuration.
  *
@@ -27,6 +29,7 @@ public class SwaggerConfiguration {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .useDefaultResponseMessages(false)
+                .directModelSubstitute(LocalDateTime.class, String.class)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.dataart.tmurzenkov.cassandra.controller"))
                 .paths(PathSelectors.any())
@@ -40,10 +43,9 @@ public class SwaggerConfiguration {
      * @return {@link ApiInfo}
      */
     private ApiInfo apiInfo() {
-        ApiInfo apiInfo = new ApiInfo("Rest API for the cassandra course",
+        return new ApiInfo("Rest API for the cassandra course",
                 "RESTFul API implementation for DA internal cassandra course",
                 "", "", "myeaddress@company.com", "",
                 "https://gitlab.dataart.com/training.Cassandra/tmurzenkov-dbs05.git");
-        return apiInfo;
     }
 }

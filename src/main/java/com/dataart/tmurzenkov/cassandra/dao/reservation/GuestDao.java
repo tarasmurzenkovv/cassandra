@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.dao;
+package com.dataart.tmurzenkov.cassandra.dao.reservation;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import org.springframework.data.cassandra.repository.CassandraRepository;

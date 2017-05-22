@@ -1,10 +1,11 @@
 package com.dataart.tmurzenkov.cassandra.service;
 
-import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
-import com.dataart.tmurzenkov.cassandra.model.entity.Room;
 
-import java.time.LocalDateTime;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Room service to:
@@ -18,18 +19,17 @@ public interface RoomService {
     /**
      * Adds new room to the hotel.
      *
-     * @param room  {@link Room}
-     * @param hotel {@link Hotel}
+     * @param room {@link Room}
      */
-    void addRoomToHotel(Room room, Hotel hotel);
+    void addRoomToHotel(Room room);
 
     /**
      * Finds free rooms for the given hotel in the given time period.
      *
-     * @param start start time period {@link LocalDateTime}
-     * @param end   end time period {@link LocalDateTime}
-     * @param hotel {@link Hotel}
+     * @param start start time period {@link Date}
+     * @param end   end time period {@link Date}
+     * @param hotelId {@link UUID}
      * @return {@link List} of {@link Room}
      */
-    List<Room> findFreeRoomsInTheHotel(LocalDateTime start, LocalDateTime end, Hotel hotel);
+    List<Room> findFreeRoomsInTheHotel(Date start, Date end, UUID hotelId);
 }

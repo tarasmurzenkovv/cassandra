@@ -22,4 +22,13 @@ public interface HotelDao extends CassandraRepository<Hotel> {
      */
     @Query("select * from hotels where hotel_id in (?0)")
     List<Hotel> findAllHotelsByTheirIds(List<UUID> uuid);
+
+    /**
+     * Finds one hotel by its id.
+     *
+     * @param hotelId {@link UUID}
+     * @return {@link Hotel}
+     */
+    @Query("select * from hotels where hotel_id = ?0")
+    Hotel findOne(UUID hotelId);
 }

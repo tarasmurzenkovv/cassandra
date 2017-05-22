@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @EnableWebMvc
 @Configuration
-@Import(SwaggerConfiguration.class)
+@Import({SwaggerConfiguration.class, HotelCassandraConfiguration.class, ReservationCassandraConfiguration.class})
 @ComponentScan("com.dataart.tmurzenkov.cassandra")
 public class WebContextConfiguration extends WebMvcConfigurerAdapter {
 

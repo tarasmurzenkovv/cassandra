@@ -17,18 +17,9 @@ public interface HotelDao extends CassandraRepository<Hotel> {
     /**
      * Find all {@link Hotel} by the provided list of {@link UUID} their ids.
      *
-     * @param ids hotel id
+     * @param uuid hotel id
      * @return {@link List} of {@link Hotel}
      */
-    @Query("select * from hotels where hotel_id in (?0);")
-    List<Hotel> findAllHotelsByTheirIds(List<UUID> ids);
-
-    /**
-     * Insert new record in the table hotels_by_city.
-     *
-     * @param hotelId hotel id
-     * @param city    city name
-     */
-    @Query("insert into hotels_by_city (hotel_id, city) values (?0,?1);")
-    void insertIntoHotelByCity(UUID hotelId, String city);
+    @Query("select * from hotels where hotel_id in (?0)")
+    List<Hotel> findAllHotelsByTheirIds(List<UUID> uuid);
 }

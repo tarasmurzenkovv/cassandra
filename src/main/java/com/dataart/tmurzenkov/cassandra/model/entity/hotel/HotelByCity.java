@@ -1,6 +1,5 @@
 package com.dataart.tmurzenkov.cassandra.model.entity;
 
-import com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
@@ -14,15 +13,16 @@ import java.util.UUID;
  */
 @Table("hotels_by_city")
 public class HotelByCity {
-    @PrimaryKeyColumn(value = "city", ordinal = OrdinalConstants.FIRST, type = PrimaryKeyType.PARTITIONED)
+    @PrimaryKeyColumn(value = "city", type = PrimaryKeyType.PARTITIONED, forceQuote = true)
     private String city;
-    @PrimaryKeyColumn(value = "hotel_id", ordinal = OrdinalConstants.SECOND, type = PrimaryKeyType.CLUSTERED)
-    private UUID hotelId;
+    @PrimaryKeyColumn(value = "id", type = PrimaryKeyType.CLUSTERED)
+    private UUID id;
 
     /**
      * Default constructor.
      */
     public HotelByCity() {
+
     }
 
     /**
@@ -31,16 +31,16 @@ public class HotelByCity {
      * @param hotel {@link Hotel}
      */
     public HotelByCity(Hotel hotel) {
-        this.hotelId = hotel.getId();
+        this.id = hotel.getId();
         this.city = hotel.getAddress().getCity();
     }
 
-    public UUID getHotelId() {
-        return hotelId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setHotelId(UUID hotelId) {
-        this.hotelId = hotelId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getCity() {
@@ -62,11 +62,11 @@ public class HotelByCity {
 
         HotelByCity that = (HotelByCity) o;
 
-        return hotelId != null ? hotelId.equals(that.hotelId) : that.hotelId == null;
+        return id != null ? id.equals(that.id) : that.id == null;
     }
 
     @Override
     public int hashCode() {
-        return hotelId != null ? hotelId.hashCode() : 0;
+        return id != null ? id.hashCode() : 0;
     }
 }

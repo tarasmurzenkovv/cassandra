@@ -1,7 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.hateos;
 
 import com.dataart.tmurzenkov.cassandra.controller.HotelController;
-import com.dataart.tmurzenkov.cassandra.model.entity.Hotel;
+import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.stereotype.Service;

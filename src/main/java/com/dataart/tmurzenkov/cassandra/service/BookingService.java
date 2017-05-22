@@ -1,7 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.service;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.Hotel;
+import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.Room;
 
 import java.util.List;

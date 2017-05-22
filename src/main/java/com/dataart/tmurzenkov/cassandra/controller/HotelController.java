@@ -1,6 +1,6 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
-import com.dataart.tmurzenkov.cassandra.model.entity.Hotel;
+import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.service.HotelService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;

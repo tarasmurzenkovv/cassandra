@@ -1,9 +1,9 @@
 package com.dataart.tmurzenkov.cassandra.service.impl;
 
-import com.dataart.tmurzenkov.cassandra.dao.HotelByCityDao;
-import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
-import com.dataart.tmurzenkov.cassandra.model.entity.Hotel;
-import com.dataart.tmurzenkov.cassandra.model.entity.HotelByCity;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelByCityDao;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
+import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
+import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
 import com.dataart.tmurzenkov.cassandra.service.HotelService;
 import com.dataart.tmurzenkov.cassandra.service.Validator;
 import org.slf4j.Logger;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
 import static java.util.stream.Collectors.toList;
@@ -43,7 +42,7 @@ public class HotelServiceImpl implements HotelService {
         LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
         validatorService.withRepository(hotelDao).doValidate(hotel);
         final Hotel save = hotelDao.save(hotel);
-        hotelDao.insertIntoHotelByCity(save.getId(), save.getAddress().getCity());
+        hotelByCityDao.save(new HotelByCity(save));
         return save;
     }
 
@@ -52,7 +51,8 @@ public class HotelServiceImpl implements HotelService {
         if (isEmpty(city)) {
             throw new IllegalArgumentException("Cannot find the hotels for the empty city name");
         }
-        List<UUID> hotelIds = hotelByCityDao.findAllHotelIdsInTheCity(city).stream().map(HotelByCity::getHotelId).collect(toList());
-        return hotelDao.findAllHotelsByTheirIds(hotelIds);
+        List<HotelByCity> allHotelIdsInTheCity = hotelByCityDao.findAllHotelIdsInTheCity(city);
+        List<UUID> uuids = allHotelIdsInTheCity.stream().map(HotelByCity::getId).collect(toList());
+        return hotelDao.findAllHotelsByTheirIds(uuids);
     }
 }

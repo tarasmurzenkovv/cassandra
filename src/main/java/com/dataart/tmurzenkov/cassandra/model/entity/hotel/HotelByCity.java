@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.model.entity;
+package com.dataart.tmurzenkov.cassandra.model.entity.hotel;
 
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;

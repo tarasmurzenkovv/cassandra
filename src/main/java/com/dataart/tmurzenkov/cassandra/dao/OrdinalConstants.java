@@ -10,5 +10,4 @@ public interface OrdinalConstants {
     int FIRST = 1;
     int SECOND = 2;
     int THIRD = 3;
-    int FORTH = 4;
 }

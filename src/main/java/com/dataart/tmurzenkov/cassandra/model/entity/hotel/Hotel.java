@@ -1,6 +1,8 @@
-package com.dataart.tmurzenkov.cassandra.model.entity;
+package com.dataart.tmurzenkov.cassandra.model.entity.hotel;
 
 import com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants;
+import com.dataart.tmurzenkov.cassandra.model.entity.Address;
+import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.mapping.annotations.FrozenValue;
 import com.fasterxml.jackson.annotation.JsonIgnore;

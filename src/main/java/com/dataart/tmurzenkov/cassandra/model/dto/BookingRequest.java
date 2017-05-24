@@ -1,6 +1,8 @@
 package com.dataart.tmurzenkov.cassandra.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
@@ -12,19 +14,25 @@ import java.util.UUID;
  *
  * @author tmurzenkov
  */
+@ApiModel(value = "BookingRequest", description = "The booking request object.")
 public class BookingRequest {
     @NotNull
+    @ApiModelProperty(value = "The UUID representation of the guest id", required = true, dataType = "String representation of the UUID. ")
     private UUID guestId;
     @NotNull
+    @ApiModelProperty(value = "The UUID representation of the hotel id", required = true, dataType = "String representation of the UUID. ")
     private UUID hotelId;
     @NotNull
+    @ApiModelProperty(value = "The room number", required = true, dataType = "String representation of the integer. ")
     private Integer roomNumber;
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @ApiModelProperty(value = "The starting date for the booking time range", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
     private Date startDate;
     @NotNull
     @Future
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @ApiModelProperty(value = "The ending date for the booking time range", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
     private Date endDate;
 
     public UUID getGuestId() {

@@ -24,9 +24,9 @@ import java.util.UUID;
  */
 @Table("hotels")
 public class Hotel implements BasicEntity {
-    @PrimaryKeyColumn(name = "hotel_id", ordinal = OrdinalConstants.ZEROS, type = PrimaryKeyType.PARTITIONED)
+    @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
     private UUID id;
-    @Column(value = "name")
+    @PrimaryKeyColumn(name = "name", type = PrimaryKeyType.CLUSTERED)
     private String name;
     @Column(value = "phone")
     private String phone;

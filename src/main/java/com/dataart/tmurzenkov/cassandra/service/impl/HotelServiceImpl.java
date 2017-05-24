@@ -38,12 +38,12 @@ public class HotelServiceImpl implements HotelService {
      * @param hotel {@link Hotel}
      * @return {@link Hotel}
      */
-    public Hotel addNewHotelToTheSystem(Hotel hotel) {
+    public Hotel addHotel(Hotel hotel) {
         LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
         validatorService.withRepository(hotelDao).doValidate(hotel);
-        final Hotel save = hotelDao.save(hotel);
-        hotelByCityDao.save(new HotelByCity(save));
-        return save;
+        final Hotel registeredHotel = hotelDao.save(hotel);
+        hotelByCityDao.save(new HotelByCity(registeredHotel));
+        return registeredHotel;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class HotelServiceImpl implements HotelService {
             throw new IllegalArgumentException("Cannot find the hotels for the empty city name");
         }
         List<HotelByCity> allHotelIdsInTheCity = hotelByCityDao.findAllHotelIdsInTheCity(city);
-        List<UUID> uuids = allHotelIdsInTheCity.stream().map(HotelByCity::getId).collect(toList());
+        List<UUID> uuids = allHotelIdsInTheCity.stream().map(HotelByCity::getHotelId).collect(toList());
         return hotelDao.findAllHotelsByTheirIds(uuids);
     }
 }

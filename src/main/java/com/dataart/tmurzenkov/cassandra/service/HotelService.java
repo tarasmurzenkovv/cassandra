@@ -19,7 +19,7 @@ public interface HotelService {
      * @param hotel {@link Hotel}
      * @return added {@link Hotel}
      */
-    Hotel addNewHotelToTheSystem(Hotel hotel);
+    Hotel addHotel(Hotel hotel);
 
     /**
      * Finds all hotels by the given city name.

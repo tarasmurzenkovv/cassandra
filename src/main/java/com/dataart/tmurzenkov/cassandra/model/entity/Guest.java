@@ -4,11 +4,12 @@ import com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
+import org.springframework.data.cassandra.repository.MapId;
+import org.springframework.data.cassandra.repository.support.BasicMapId;
 
 import java.util.Set;
 import java.util.UUID;
 
-import static org.springframework.cassandra.core.Ordering.DESCENDING;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
 /**
@@ -26,8 +27,8 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
  * @see OrdinalConstants
  */
 @Table("guests")
-public class Guest {
-    @PrimaryKeyColumn(name = "guest_id", type = PARTITIONED, ordering = DESCENDING)
+public class Guest implements BasicEntity {
+    @PrimaryKeyColumn(name = "guest_id", type = PARTITIONED)
     private UUID id;
     @Column(value = "first_name")
     private String firstName;
@@ -41,6 +42,11 @@ public class Guest {
     private Set<String> phoneNumbers;
     @Column(value = "title")
     private String title;
+
+    @Override
+    public MapId getCompositeId() {
+        return BasicMapId.id("id", this.id);
+    }
 
     public UUID getId() {
         return id;

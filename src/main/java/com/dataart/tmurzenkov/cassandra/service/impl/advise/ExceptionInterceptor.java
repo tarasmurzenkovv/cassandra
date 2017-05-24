@@ -1,7 +1,9 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.advise;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.ErrorDto;
+import com.dataart.tmurzenkov.cassandra.model.exception.AlreadyBookedException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
+import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cassandra.support.exception.CassandraInvalidQueryException;
@@ -28,6 +30,28 @@ public class ExceptionInterceptor {
     @ExceptionHandler(RecordExistsException.class)
     public ResponseEntity<ErrorDto> handle(RecordExistsException e) {
         return logAndMake(e, HttpStatus.CONFLICT, "RECORD_ALREADY_EXISTS");
+    }
+
+    /**
+     * Logs {@link RecordNotFoundException} and transforms to {@link ResponseEntity} with {@link ErrorDto}.
+     *
+     * @param e {@link RecordNotFoundException}
+     * @return {@link ResponseEntity} with status <code>HttpStatus.NOT_FOUND</code>
+     */
+    @ExceptionHandler(RecordNotFoundException.class)
+    public ResponseEntity<ErrorDto> handle(RecordNotFoundException e) {
+        return logAndMake(e, HttpStatus.NOT_FOUND, "RECORD_NOT_EXISTS");
+    }
+
+    /**
+     * Logs {@link AlreadyBookedException} and transforms to {@link ResponseEntity} with {@link ErrorDto}.
+     *
+     * @param e {@link AlreadyBookedException}
+     * @return {@link ResponseEntity} with status <code>HttpStatus.CONFLICT</code>
+     */
+    @ExceptionHandler(AlreadyBookedException.class)
+    public ResponseEntity<ErrorDto> handle(AlreadyBookedException e) {
+        return logAndMake(e, HttpStatus.CONFLICT, "ALREADY_BOOKED");
     }
 
     /**

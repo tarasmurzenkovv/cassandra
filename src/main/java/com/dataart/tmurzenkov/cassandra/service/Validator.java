@@ -23,6 +23,7 @@ public interface Validator<T extends BasicEntity> {
      * Performs the validation logic. Might throw the instance of the {@link RuntimeException}.
      *
      * @param instance any instance of the {@link BasicEntity}
+     * @return {@link T} the actual validated instance.
      */
-    void doValidate(T instance);
+    T doValidate(T instance);
 }

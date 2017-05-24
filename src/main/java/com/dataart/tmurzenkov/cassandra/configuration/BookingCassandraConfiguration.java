@@ -10,14 +10,14 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 
 /**
  * Cassandra spring data configuration to work with dao that are located at
- * com.dataart.tmurzenkov.cassandra.dao.reservation .
+ * com.dataart.tmurzenkov.cassandra.dao.booking .
  *
  * @author tmurzenkov
  */
-@EnableCassandraRepositories(basePackages = "com.dataart.tmurzenkov.cassandra.dao.reservation",
+@EnableCassandraRepositories(basePackages = "com.dataart.tmurzenkov.cassandra.dao.booking",
         cassandraTemplateRef = "reservationTemplate")
 @Configuration
-public class ReservationCassandraConfiguration extends BaseCassandraConfiguration {
+public class BookingCassandraConfiguration extends BaseCassandraConfiguration {
     @Value("${cassandra.keyspace.reservation}")
     private String reservationKeySpace;
 
@@ -29,6 +29,7 @@ public class ReservationCassandraConfiguration extends BaseCassandraConfiguratio
 
     @Override
     @Bean(name = "reservationSession")
+    @SuppressWarnings("Duplicates")
     public CassandraSessionFactoryBean session() throws ClassNotFoundException {
 
         CassandraSessionFactoryBean session = new CassandraSessionFactoryBean();

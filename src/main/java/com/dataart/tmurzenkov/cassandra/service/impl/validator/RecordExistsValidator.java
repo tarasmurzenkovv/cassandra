@@ -28,10 +28,11 @@ public class RecordExistsValidator<T extends BasicEntity> implements Validator<T
     }
 
     @Override
-    public void doValidate(T entity) throws IllegalArgumentException {
+    public T doValidate(T entity) throws IllegalArgumentException {
         MapId compositeId = entity.getCompositeId();
         if (cassandraRepository.exists(compositeId)) {
             throw new RecordExistsException("Duplicate entry found in DB. The id of the entity: " + entity.getId().toString());
         }
+        return entity;
     }
 }

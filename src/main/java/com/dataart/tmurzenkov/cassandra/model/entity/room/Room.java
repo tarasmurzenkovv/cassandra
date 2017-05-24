@@ -26,6 +26,28 @@ public class Room {
     public Room() {
     }
 
+    /**
+     * Constructs from {@link RoomByGuestAndDate}.
+     *
+     * @param roomByGuestAndDate {@link RoomByGuestAndDate}
+     */
+    public Room(RoomByGuestAndDate roomByGuestAndDate) {
+        this.hotelId = roomByGuestAndDate.getHotelId();
+        this.roomNumber = roomByGuestAndDate.getRoomNumber();
+    }
+
+    /**
+     * Constructs from the provided hotel id and room number.
+     *
+     * @param hotelId    {@link UUID}
+     * @param roomNumber {@link Integer}
+     */
+    public Room(UUID hotelId, Integer roomNumber) {
+        this.hotelId = hotelId;
+        this.roomNumber = roomNumber;
+    }
+
+
     public UUID getHotelId() {
         return hotelId;
     }

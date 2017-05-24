@@ -5,6 +5,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -31,5 +32,5 @@ public interface RoomService {
      * @param hotelId {@link UUID}
      * @return {@link List} of {@link Room}
      */
-    List<Room> findFreeRoomsInTheHotel(Date start, Date end, UUID hotelId);
+    Set<Room> findFreeRoomsInTheHotel(Date start, Date end, UUID hotelId);
 }

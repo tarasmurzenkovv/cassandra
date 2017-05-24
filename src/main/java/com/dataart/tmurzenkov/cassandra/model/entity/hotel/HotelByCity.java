@@ -13,10 +13,10 @@ import java.util.UUID;
  */
 @Table("hotels_by_city")
 public class HotelByCity {
-    @PrimaryKeyColumn(value = "city", type = PrimaryKeyType.PARTITIONED, forceQuote = true)
-    private String city;
-    @PrimaryKeyColumn(value = "id", type = PrimaryKeyType.CLUSTERED)
-    private UUID id;
+    @PrimaryKeyColumn(name = "city_name", type = PrimaryKeyType.PARTITIONED)
+    private String cityName;
+    @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.CLUSTERED)
+    private UUID hotelId;
 
     /**
      * Default constructor.
@@ -31,24 +31,24 @@ public class HotelByCity {
      * @param hotel {@link Hotel}
      */
     public HotelByCity(Hotel hotel) {
-        this.id = hotel.getId();
-        this.city = hotel.getAddress().getCity();
+        this.hotelId = hotel.getId();
+        this.cityName = hotel.getAddress().getCity();
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getHotelId() {
+        return hotelId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setHotelId(UUID hotelId) {
+        this.hotelId = hotelId;
     }
 
-    public String getCity() {
-        return city;
+    public String getCityName() {
+        return cityName;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     @Override
@@ -62,11 +62,11 @@ public class HotelByCity {
 
         HotelByCity that = (HotelByCity) o;
 
-        return id != null ? id.equals(that.id) : that.id == null;
+        return hotelId != null ? hotelId.equals(that.hotelId) : that.hotelId == null;
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return hotelId != null ? hotelId.hashCode() : 0;
     }
 }

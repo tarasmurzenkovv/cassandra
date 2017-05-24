@@ -5,6 +5,7 @@ import com.dataart.tmurzenkov.cassandra.service.RoomService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
@@ -64,9 +66,11 @@ public class RoomController {
     @RequestMapping(path = "/api/get/freerooms/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public List<Resource<Room>> findFreeRooms(@RequestParam("hotelId") UUID hotelId,
-                                              @RequestParam("start") Date start,
-                                              @RequestParam("end") Date end) {
-        List<Room> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(start, end, hotelId);
+                                              @RequestParam("start")
+                                              @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
+                                              @RequestParam("end")
+                                              @DateTimeFormat(pattern = "yyyy-MM-dd") Date end) {
+        Set<Room> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(start, end, hotelId);
         return freeRoomsByHotelId.stream().map(resourceAssembler::toResource).collect(toList());
     }
 

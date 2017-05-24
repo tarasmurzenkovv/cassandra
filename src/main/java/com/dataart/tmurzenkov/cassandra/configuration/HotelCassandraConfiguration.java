@@ -30,6 +30,7 @@ public class HotelCassandraConfiguration extends BaseCassandraConfiguration {
 
     @Override
     @Bean(name = "hotelSession")
+    @SuppressWarnings("Duplicates")
     public CassandraSessionFactoryBean session() throws ClassNotFoundException {
 
         CassandraSessionFactoryBean session = new CassandraSessionFactoryBean();

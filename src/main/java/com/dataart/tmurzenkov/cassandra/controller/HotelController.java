@@ -32,7 +32,6 @@ import static java.util.stream.Collectors.toList;
 @RestController
 @Api(description = "REST API to manage hotels in the booking system. ")
 public class HotelController {
-
     @Autowired
     private HotelService hotelServiceImpl;
     @Autowired
@@ -45,7 +44,7 @@ public class HotelController {
      * @return list of the {@link Hotel}
      */
     @ApiOperation(value = "Finds all hotels in the city.", notes = "Finds all hotels in the city. ")
-    @RequestMapping(path = "/api/get/{city}", method = RequestMethod.GET)
+    @RequestMapping(path = "/api/get/{city}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Resource<Hotel>> getAllHotelsInTheCity(
             @ApiParam(value = "Name of the city to where to search", required = true)
             @PathVariable("city") String city) {
@@ -67,7 +66,7 @@ public class HotelController {
     public Resource<Hotel> addHotel(
             @ApiParam(value = "Hotel dto. ", required = true)
             @RequestBody Hotel hotel) {
-        Hotel saved = hotelServiceImpl.addNewHotelToTheSystem(hotel);
+        Hotel saved = hotelServiceImpl.addHotel(hotel);
         return resourceAssembler.toResource(saved);
     }
 }

@@ -1,6 +1,5 @@
 package com.dataart.tmurzenkov.cassandra.model.entity.hotel;
 
-import com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
 import com.datastax.driver.core.DataType;
@@ -20,10 +19,9 @@ import java.util.UUID;
  * 'Hotel' cassandra entity.
  *
  * @author tmurzenkov
- * @see OrdinalConstants
  */
 @Table("hotels")
-public class Hotel implements BasicEntity {
+public class Hotel extends BasicEntity {
     @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
     private UUID id;
     @PrimaryKeyColumn(name = "name", type = PrimaryKeyType.CLUSTERED)
@@ -44,7 +42,7 @@ public class Hotel implements BasicEntity {
     @Override
     @JsonIgnore
     public MapId getCompositeId() {
-        return new BasicMapId().with("id", this.id);
+        return new BasicMapId().with("id", this.id).with("name", this.name);
     }
 
     @JsonIgnore

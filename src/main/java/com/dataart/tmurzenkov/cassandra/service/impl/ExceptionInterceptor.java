@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.service.impl.advise;
+package com.dataart.tmurzenkov.cassandra.service.impl;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.ErrorDto;
 import com.dataart.tmurzenkov.cassandra.model.exception.AlreadyBookedException;

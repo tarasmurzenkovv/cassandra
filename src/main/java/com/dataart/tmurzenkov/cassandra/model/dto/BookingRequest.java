@@ -6,7 +6,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -16,24 +16,20 @@ import java.util.UUID;
  */
 @ApiModel(value = "BookingRequest", description = "The booking request object.")
 public class BookingRequest {
-    @NotNull
+    @NotNull(message = "The guest id must not be null. ")
     @ApiModelProperty(value = "The UUID representation of the guest id", required = true, dataType = "String representation of the UUID. ")
     private UUID guestId;
-    @NotNull
+    @NotNull(message = "The hotel id must not be null. ")
     @ApiModelProperty(value = "The UUID representation of the hotel id", required = true, dataType = "String representation of the UUID. ")
     private UUID hotelId;
-    @NotNull
+    @NotNull(message = "The room number must not be null. ")
     @ApiModelProperty(value = "The room number", required = true, dataType = "String representation of the integer. ")
     private Integer roomNumber;
-    @NotNull
+    @NotNull(message = "The booking date must not be null. ")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @ApiModelProperty(value = "The starting date for the booking time range", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
-    private Date startDate;
-    @NotNull
-    @Future
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @ApiModelProperty(value = "The ending date for the booking time range", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
-    private Date endDate;
+    @ApiModelProperty(value = "The booking date", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
+    @Future(message = "Cannot book the room for the past date")
+    private LocalDate bookingDate;
 
     public UUID getGuestId() {
         return guestId;
@@ -59,20 +55,12 @@ public class BookingRequest {
         this.roomNumber = roomNumber;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public LocalDate getBookingDate() {
+        return bookingDate;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
     }
 
     @Override
@@ -81,8 +69,39 @@ public class BookingRequest {
                 + "guestId=" + guestId
                 + ", hotelId=" + hotelId
                 + ", roomNumber=" + roomNumber
-                + ", startDate=" + startDate
-                + ", endDate=" + endDate
+                + ", bookingDate=" + bookingDate
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        BookingRequest that = (BookingRequest) o;
+
+        if (guestId != null ? !guestId.equals(that.guestId) : that.guestId != null) {
+            return false;
+        }
+        if (hotelId != null ? !hotelId.equals(that.hotelId) : that.hotelId != null) {
+            return false;
+        }
+        if (roomNumber != null ? !roomNumber.equals(that.roomNumber) : that.roomNumber != null) {
+            return false;
+        }
+        return bookingDate != null ? bookingDate.equals(that.bookingDate) : that.bookingDate == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = guestId != null ? guestId.hashCode() : 0;
+        result = 31 * result + (hotelId != null ? hotelId.hashCode() : 0);
+        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0);
+        result = 31 * result + (bookingDate != null ? bookingDate.hashCode() : 0);
+        return result;
     }
 }

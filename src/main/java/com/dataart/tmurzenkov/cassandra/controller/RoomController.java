@@ -1,42 +1,56 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
+import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.service.RoomService;
+import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
-import static java.util.stream.Collectors.toList;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.CREATED;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.FOUND;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.NOT_FOUND;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.BAD_REQUEST;
+import static com.dataart.tmurzenkov.cassandra.controller.uri.RoomUris.GET_FREE_ROOMS;
+import static com.dataart.tmurzenkov.cassandra.controller.uri.Uris.ADD_ROOM;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Room controller.
- * "api"/"get"/"freerooms"
  *
  * @author tmurzenkov
  */
 @RestController
-@Api(description = "REST API to manage hotel rooms in the booking system. ")
+@Api(value = "Room operations. ", description = "REST API to manage hotel rooms in the booking system. ")
 public class RoomController {
-    @Autowired
-    private ResourceAssembler<Room, Resource<Room>> resourceAssembler;
-    @Autowired
-    private RoomService roomService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoomController.class);
+    private final ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler;
+    private final RoomService roomService;
+
+    /**
+     * Autowire the below services into the controller.
+     *
+     * @param resourceAssembler {@link ServiceResourceAssembler}
+     * @param roomService       {@link RoomService}
+     */
+    public RoomController(ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler, RoomService roomService) {
+        this.resourceAssembler = resourceAssembler;
+        this.roomService = roomService;
+    }
 
     /**
      * Adds new hotel room to the system.
@@ -44,34 +58,35 @@ public class RoomController {
      * @param room {@link Room}
      * @return {@link Resource}
      */
-    @ApiOperation(value = "Adds new hotel room to the system.",
-            notes = "Adds new hotel room to the system and returns the location header. ")
-    @RequestMapping(path = "/api/add/room", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Adds new room to the system.", notes = "Adds new hotel room to the system and returns the location header. ")
+    @RequestMapping(path = ADD_ROOM, method = POST, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @ApiResponses({
+            @ApiResponse(code = CREATED, message = "Add room to the hotel. "),
+            @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public Resource<Room> addRoomToTheHotel(@RequestBody Room room) {
+        LOGGER.info("Going to add the following room into the data base '{}'", room);
         roomService.addRoomToHotel(room);
-        return resourceAssembler.toResource(room);
+        return resourceAssembler.withController(RoomController.class).toResource(room);
     }
 
     /**
-     * Find free rooms by hotel id.
+     * Find free rooms by hotel id and within time interval.
      *
-     * @param hotelId {@link UUID}
-     * @param start   {@link Date} start date
-     * @param end     {@link Date} end date
+     * @param searchRequest {@link SearchRequest}
      * @return {@link List} of {@link Resource} of {@link Room}
      */
-    @ApiOperation(value = "Finds free rooms.",
-            notes = "Finds free rooms by hotel id")
-    @RequestMapping(path = "/api/get/freerooms/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.OK)
-    public List<Resource<Room>> findFreeRooms(@RequestParam("hotelId") UUID hotelId,
-                                              @RequestParam("start")
-                                              @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
-                                              @RequestParam("end")
-                                              @DateTimeFormat(pattern = "yyyy-MM-dd") Date end) {
-        Set<Room> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(start, end, hotelId);
-        return freeRoomsByHotelId.stream().map(resourceAssembler::toResource).collect(toList());
+    @ApiOperation(value = "Finds free rooms.", notes = "Finds free rooms by hotel id")
+    @RequestMapping(path = GET_FREE_ROOMS, method = GET, produces = APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.FOUND)
+    @ApiResponses({
+            @ApiResponse(code = FOUND, message = "Found free rooms in the hotel. "),
+            @ApiResponse(code = NOT_FOUND, message = "Not found free rooms in the hotel. "),
+            @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
+    public List<Resource<Room>> findFreeRooms(@RequestBody SearchRequest searchRequest) {
+        LOGGER.info("Going to find the free rooms for the following request: '{}'", searchRequest);
+        List<Room> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(searchRequest);
+        return resourceAssembler.toResource(freeRoomsByHotelId);
     }
 
 }

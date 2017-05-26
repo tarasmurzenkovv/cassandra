@@ -1,20 +1,23 @@
 package com.dataart.tmurzenkov.cassandra.service.impl;
 
+import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelByCityDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
+import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
+import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.HotelService;
-import com.dataart.tmurzenkov.cassandra.service.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
+import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
+import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -25,12 +28,19 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class HotelServiceImpl implements HotelService {
     private static Logger LOGGER = LoggerFactory.getLogger(HotelServiceImpl.class);
-    @Autowired
-    private HotelDao hotelDao;
-    @Autowired
-    private HotelByCityDao hotelByCityDao;
-    @Autowired
-    private Validator<Hotel> validatorService;
+    private final HotelDao hotelDao;
+    private final HotelByCityDao hotelByCityDao;
+
+    /**
+     * The below services will be autowired by Spring automatically.
+     *
+     * @param hotelDao       {@link GuestDao}
+     * @param hotelByCityDao {@link HotelByCityDao}
+     */
+    public HotelServiceImpl(HotelDao hotelDao, HotelByCityDao hotelByCityDao) {
+        this.hotelDao = hotelDao;
+        this.hotelByCityDao = hotelByCityDao;
+    }
 
     /**
      * Saves the hotel to the DB.
@@ -40,9 +50,10 @@ public class HotelServiceImpl implements HotelService {
      */
     public Hotel addHotel(Hotel hotel) {
         LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
-        validatorService.withRepository(hotelDao).doValidate(hotel);
-        final Hotel registeredHotel = hotelDao.save(hotel);
+        validate(hotel);
+        final Hotel registeredHotel = hotelDao.insert(hotel);
         hotelByCityDao.save(new HotelByCity(registeredHotel));
+        LOGGER.info("Successfully saved the new entity into the DB: '{}'", registeredHotel);
         return registeredHotel;
     }
 
@@ -51,8 +62,20 @@ public class HotelServiceImpl implements HotelService {
         if (isEmpty(city)) {
             throw new IllegalArgumentException("Cannot find the hotels for the empty city name");
         }
-        List<HotelByCity> allHotelIdsInTheCity = hotelByCityDao.findAllHotelIdsInTheCity(city);
-        List<UUID> uuids = allHotelIdsInTheCity.stream().map(HotelByCity::getHotelId).collect(toList());
-        return hotelDao.findAllHotelsByTheirIds(uuids);
+        List<Hotel> hotelsForTheCity = hotelByCityDao.findAllHotelIdsInTheCity(city).stream()
+                .map(hotelProjection -> hotelDao.findOne(hotelProjection.getId())).collect(toList());
+        if (hotelsForTheCity.isEmpty()) {
+            throw new RecordNotFoundException(format("Cannot find hotels for the given city '%s'", city));
+        }
+        LOGGER.info("Found the following hotels '{}' for the city '{}'", makeString(hotelsForTheCity), city);
+        return hotelsForTheCity;
+    }
+
+    private void validate(Hotel hotel) {
+        final String message = format("Such hotel information is already added to the data base '%s'", hotel);
+        validator()
+                .withCondition(h -> null != hotelDao.findOne(h.getCompositeId()))
+                .onConditionFailureThrow(() -> new RecordExistsException(message))
+                .doValidate(hotel);
     }
 }

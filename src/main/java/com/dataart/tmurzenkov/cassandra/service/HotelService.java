@@ -5,9 +5,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import java.util.List;
 
 /**
- * Hotel service to:
- * - Adds a new hotel to the system.
- * - Get all hotels of a current city.
+ * Hotel service.
  *
  * @author tmurzenkov
  */

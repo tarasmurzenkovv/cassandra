@@ -1,6 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.model.entity;
 
 import org.springframework.data.cassandra.repository.MapId;
+import org.springframework.data.cassandra.repository.support.BasicMapId;
 
 import java.util.UUID;
 
@@ -8,21 +9,21 @@ import java.util.UUID;
  * Basic Cassandra entity.
  *
  * @author tmurzenkov
- * @see org.springframework.data.cassandra.repository.support.BasicMapId
+ * @see BasicMapId
  */
-public interface BasicEntity {
+public abstract class BasicEntity {
 
     /**
-     * Must return the new composite id.
+     * Must return the composite id.
      *
      * @return {@link MapId}
      */
-    MapId getCompositeId();
+    public abstract MapId getCompositeId();
 
     /**
-     * Serves as the partitioning key.
+     * Must return the id.
      *
      * @return {@link UUID}
      */
-    UUID getId();
+    public abstract UUID getId();
 }

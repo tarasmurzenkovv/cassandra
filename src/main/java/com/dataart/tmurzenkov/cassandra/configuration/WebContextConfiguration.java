@@ -1,5 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.configuration;
 
+import com.dataart.tmurzenkov.cassandra.configuration.database.BookingCassandraConfiguration;
+import com.dataart.tmurzenkov.cassandra.configuration.database.HotelCassandraConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

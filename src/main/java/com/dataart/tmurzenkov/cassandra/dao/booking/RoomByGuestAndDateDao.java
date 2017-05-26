@@ -4,7 +4,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,9 +19,9 @@ public interface RoomByGuestAndDateDao extends CassandraRepository<RoomByGuestAn
      * Selects/finds all instances of the {@link RoomByGuestAndDate} for the specified guest id and booking date.
      *
      * @param guestId     {@link UUID} guest id
-     * @param bookingDate {@link Date} date
+     * @param bookingDate {@link LocalDate} date
      * @return list of the instances {@link RoomByGuestAndDate}
      */
     @Query("select * from room_booked_by_guest_and_date where guest_id = ?0 and booking_date = ?1")
-    List<RoomByGuestAndDate> getAllBookedRooms(UUID guestId, Date bookingDate);
+    List<RoomByGuestAndDate> getAllBookedRooms(UUID guestId, LocalDate bookingDate);
 }

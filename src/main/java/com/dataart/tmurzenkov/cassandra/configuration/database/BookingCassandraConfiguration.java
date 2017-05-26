@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.configuration;
+package com.dataart.tmurzenkov.cassandra.configuration.database;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,26 +10,25 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 
 /**
  * Cassandra spring data configuration to work with dao that are located at
- * com.dataart.tmurzenkov.cassandra.dao.hotel .
+ * com.dataart.tmurzenkov.cassandra.dao.booking .
  *
  * @author tmurzenkov
  */
-@EnableCassandraRepositories(
-        basePackages = "com.dataart.tmurzenkov.cassandra.dao.hotel",
-        cassandraTemplateRef = "hotelOperations")
+@EnableCassandraRepositories(basePackages = "com.dataart.tmurzenkov.cassandra.dao.booking",
+        cassandraTemplateRef = "reservationTemplate")
 @Configuration
-public class HotelCassandraConfiguration extends BaseCassandraConfiguration {
-    @Value("${cassandra.keyspace.hotel}")
-    private String hotelKeySpace;
+public class BookingCassandraConfiguration extends BaseCassandraConfiguration {
+    @Value("${cassandra.keyspace.reservation}")
+    private String reservationKeySpace;
 
     @Override
-    @Bean(name = "hotelOperations")
+    @Bean(name = "reservationTemplate")
     public CassandraAdminOperations cassandraTemplate() throws Exception {
         return new CassandraAdminTemplate(session().getObject(), cassandraConverter());
     }
 
     @Override
-    @Bean(name = "hotelSession")
+    @Bean(name = "reservationSession")
     @SuppressWarnings("Duplicates")
     public CassandraSessionFactoryBean session() throws ClassNotFoundException {
 
@@ -47,6 +46,6 @@ public class HotelCassandraConfiguration extends BaseCassandraConfiguration {
 
     @Override
     protected String getKeyspaceName() {
-        return hotelKeySpace;
+        return reservationKeySpace;
     }
 }

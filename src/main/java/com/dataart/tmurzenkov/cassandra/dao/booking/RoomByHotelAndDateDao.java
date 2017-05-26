@@ -1,11 +1,11 @@
 package com.dataart.tmurzenkov.cassandra.dao.booking;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
-import com.datastax.driver.core.LocalDate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,11 +20,11 @@ public interface RoomByHotelAndDateDao extends CassandraRepository<RoomByHotelAn
     /**
      * Queries all {@link RoomByHotelAndDate} for the provided hotel id, booked date and status.
      *
-     * @param hotelId    {@link UUID} hotel id
-     * @param bookedDate {@link LocalDate} booked date
-     * @param status     {@link String} status -- reserved/booked/free
-     * @return set of the {@link RoomByHotelAndDate}
+     * @param hotelId {@link UUID} hotel id
+     * @param start   {@link LocalDate} start date
+     * @param end     {@link LocalDate} end date
+     * @return List of the {@link RoomByHotelAndDate}
      */
-    @Query("select * from room_booking where hotel_id = ?0 and booked_date = ?1 and status = ?2")
-    Set<RoomByHotelAndDate> findBookedRoomInHotelForDate(UUID hotelId, LocalDate bookedDate, String status);
+    @Query("select * from room_by_hotel_and_date_and_status where hotel_id = ?0 and booking_date >= ?1 and booking_date <= ?2")
+    List<RoomByHotelAndDate> findBookedRoomInHotelForDate(UUID hotelId, LocalDate start, LocalDate end);
 }

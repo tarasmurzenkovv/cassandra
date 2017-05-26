@@ -1,11 +1,14 @@
 package com.dataart.tmurzenkov.cassandra.model.entity.room;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
+import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
+import org.springframework.data.cassandra.repository.MapId;
+import org.springframework.data.cassandra.repository.support.BasicMapId;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.springframework.cassandra.core.Ordering.DESCENDING;
@@ -18,17 +21,17 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
  * @author tmurzenkov
  */
 @Table("room_booked_by_guest_and_date")
-public class RoomByGuestAndDate {
+public class RoomByGuestAndDate extends BasicEntity {
     @PrimaryKeyColumn(name = "guest_id", type = PARTITIONED)
-    private UUID guestId;
+    private UUID id;
     @PrimaryKeyColumn(name = "booking_date", type = CLUSTERED, ordering = DESCENDING)
-    private Date bookingDate;
-    @Column("roomNumber")
+    private LocalDate bookingDate;
+    @Column("room_number")
     private Integer roomNumber;
     @Column("hotel_id")
     private UUID hotelId;
     @Column("confirmation_number")
-    private String confirmationNumber;
+    private Integer confirmationNumber;
 
     /**
      * Constructor.
@@ -43,9 +46,14 @@ public class RoomByGuestAndDate {
      */
     public RoomByGuestAndDate(BookingRequest bookingRequest) {
         this.hotelId = bookingRequest.getHotelId();
-        this.guestId = bookingRequest.getGuestId();
-        this.bookingDate = bookingRequest.getEndDate();
+        this.id = bookingRequest.getGuestId();
+        this.bookingDate = bookingRequest.getBookingDate();
         this.roomNumber = bookingRequest.getRoomNumber();
+    }
+
+    @Override
+    public MapId getCompositeId() {
+        return BasicMapId.id("id", this.id).with("bookingDate", this.bookingDate);
     }
 
     public UUID getHotelId() {
@@ -56,12 +64,12 @@ public class RoomByGuestAndDate {
         this.hotelId = hotelId;
     }
 
-    public UUID getGuestId() {
-        return guestId;
+    public UUID getId() {
+        return id;
     }
 
-    public void setGuestId(UUID guestId) {
-        this.guestId = guestId;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public Integer getRoomNumber() {
@@ -72,19 +80,30 @@ public class RoomByGuestAndDate {
         this.roomNumber = roomNumber;
     }
 
-    public Date getBookingDate() {
+    public LocalDate getBookingDate() {
         return bookingDate;
     }
 
-    public void setBookingDate(Date bookingDate) {
+    public void setBookingDate(LocalDate bookingDate) {
         this.bookingDate = bookingDate;
     }
 
-    public String getConfirmationNumber() {
+    public Integer getConfirmationNumber() {
         return confirmationNumber;
     }
 
-    public void setConfirmationNumber(String confirmationNumber) {
+    public void setConfirmationNumber(Integer confirmationNumber) {
         this.confirmationNumber = confirmationNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "RoomByGuestAndDate{"
+                + "id=" + id
+                + ", bookingDate=" + bookingDate
+                + ", roomNumber=" + roomNumber
+                + ", hotelId=" + hotelId
+                + ", confirmationNumber=" + confirmationNumber
+                + '}';
     }
 }

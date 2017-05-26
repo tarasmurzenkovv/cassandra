@@ -1,8 +1,11 @@
 package com.dataart.tmurzenkov.cassandra.model.entity.hotel;
 
+import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
+import org.springframework.data.cassandra.repository.MapId;
+import org.springframework.data.cassandra.repository.support.BasicMapId;
 
 import java.util.UUID;
 
@@ -12,11 +15,11 @@ import java.util.UUID;
  * @author tmurzenkov
  */
 @Table("hotels_by_city")
-public class HotelByCity {
+public class HotelByCity extends BasicEntity {
     @PrimaryKeyColumn(name = "city_name", type = PrimaryKeyType.PARTITIONED)
     private String cityName;
     @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.CLUSTERED)
-    private UUID hotelId;
+    private UUID id;
 
     /**
      * Default constructor.
@@ -31,16 +34,21 @@ public class HotelByCity {
      * @param hotel {@link Hotel}
      */
     public HotelByCity(Hotel hotel) {
-        this.hotelId = hotel.getId();
+        this.id = hotel.getId();
         this.cityName = hotel.getAddress().getCity();
     }
 
-    public UUID getHotelId() {
-        return hotelId;
+    @Override
+    public MapId getCompositeId() {
+        return BasicMapId.id("id", this.id).with("cityName", this.cityName);
     }
 
-    public void setHotelId(UUID hotelId) {
-        this.hotelId = hotelId;
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getCityName() {
@@ -62,11 +70,19 @@ public class HotelByCity {
 
         HotelByCity that = (HotelByCity) o;
 
-        return hotelId != null ? hotelId.equals(that.hotelId) : that.hotelId == null;
+        return id != null ? id.equals(that.id) : that.id == null;
     }
 
     @Override
     public int hashCode() {
-        return hotelId != null ? hotelId.hashCode() : 0;
+        return id != null ? id.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "HotelByCity{"
+                + "cityName='" + cityName + '\''
+                + ", id=" + id
+                + '}';
     }
 }

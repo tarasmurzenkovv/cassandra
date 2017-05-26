@@ -1,9 +1,11 @@
 package com.dataart.tmurzenkov.cassandra.model.entity.room;
 
-import com.dataart.tmurzenkov.cassandra.dao.OrdinalConstants;
+import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
+import org.springframework.data.cassandra.repository.MapId;
+import org.springframework.data.cassandra.repository.support.BasicMapId;
 
 import java.util.UUID;
 
@@ -14,10 +16,10 @@ import java.util.UUID;
  */
 
 @Table("rooms_by_hotel")
-public class Room {
-    @PrimaryKeyColumn(name = "hotel_id", ordinal = OrdinalConstants.ZEROS, type = PrimaryKeyType.PARTITIONED)
-    private UUID hotelId;
-    @PrimaryKeyColumn(name = "room_number", ordinal = OrdinalConstants.SECOND, type = PrimaryKeyType.CLUSTERED)
+public class Room extends BasicEntity {
+    @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
+    private UUID id;
+    @PrimaryKeyColumn(name = "room_number", type = PrimaryKeyType.CLUSTERED)
     private Integer roomNumber;
 
     /**
@@ -27,33 +29,46 @@ public class Room {
     }
 
     /**
+     * Constructs from the provided hotel id and room number.
+     *
+     * @param id         {@link UUID}
+     * @param roomNumber {@link Integer}
+     */
+    public Room(UUID id, Integer roomNumber) {
+        this.id = id;
+        this.roomNumber = roomNumber;
+    }
+
+    /**
      * Constructs from {@link RoomByGuestAndDate}.
      *
      * @param roomByGuestAndDate {@link RoomByGuestAndDate}
      */
     public Room(RoomByGuestAndDate roomByGuestAndDate) {
-        this.hotelId = roomByGuestAndDate.getHotelId();
-        this.roomNumber = roomByGuestAndDate.getRoomNumber();
+        this(roomByGuestAndDate.getHotelId(), roomByGuestAndDate.getRoomNumber());
     }
 
     /**
-     * Constructs from the provided hotel id and room number.
+     * Constructs from {@link RoomByHotelAndDate}.
      *
-     * @param hotelId    {@link UUID}
-     * @param roomNumber {@link Integer}
+     * @param roomByHotelAndDate {@link RoomByHotelAndDate}
      */
-    public Room(UUID hotelId, Integer roomNumber) {
-        this.hotelId = hotelId;
-        this.roomNumber = roomNumber;
+    public Room(RoomByHotelAndDate roomByHotelAndDate) {
+        this(roomByHotelAndDate.getId(), roomByHotelAndDate.getRoomNumber());
     }
 
 
-    public UUID getHotelId() {
-        return hotelId;
+    @Override
+    public MapId getCompositeId() {
+        return BasicMapId.id("id", this.id).with("roomNumber", this.roomNumber);
     }
 
-    public void setHotelId(UUID hotelId) {
-        this.hotelId = hotelId;
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public Integer getRoomNumber() {
@@ -75,7 +90,7 @@ public class Room {
 
         Room room = (Room) o;
 
-        if (hotelId != null ? !hotelId.equals(room.hotelId) : room.hotelId != null) {
+        if (id != null ? !id.equals(room.id) : room.id != null) {
             return false;
         }
 
@@ -84,7 +99,7 @@ public class Room {
 
     @Override
     public int hashCode() {
-        int result = hotelId != null ? hotelId.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0);
         return result;
     }
@@ -92,7 +107,7 @@ public class Room {
     @Override
     public String toString() {
         return "Room{"
-                + "hotel_id=" + hotelId
+                + "hotel_id=" + id
                 + ", roomNumber=" + roomNumber
                 + '}';
     }

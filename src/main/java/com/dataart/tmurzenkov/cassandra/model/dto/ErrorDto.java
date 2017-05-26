@@ -35,4 +35,5 @@ public class ErrorDto {
     public void setExceptionDescription(String exceptionDescription) {
         this.exceptionDescription = exceptionDescription;
     }
+
 }

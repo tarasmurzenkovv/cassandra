@@ -1,51 +1,66 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
+import com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
+import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
+import com.wordnik.swagger.annotations.ApiResponses;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.wordnik.swagger.annotations.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 
-
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ADD_BOOKING;
+import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ADD_GUEST;
+import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ROOMS_BY_GUEST_AND_DATE;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.BAD_REQUEST;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.CONFLICT;
+import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.NOT_FOUND;
+import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FOUND;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-
 /**
- * ReservationByGuestId controller.
- * <p>
- * - "api"/"add"/"booking"
- * - "api"/"add"/"guest"
- * - "api"/"get"/"roombyguest"
+ * Guest controller.
  *
  * @author tmurzenkov
  */
 @RestController
-@Api(description = "REST API to manage hotel guests in the booking system. ")
+@Api(value = "Guest operations", description = "REST API to manage hotel guests in the booking system. ")
 public class GuestController {
-    @Autowired
-    private ResourceAssembler<Guest, Resource<Guest>> resourceAssembler;
-    @Autowired
-    private GuestService guestService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GuestController.class);
+    private final ServiceResourceAssembler<Guest, Class<GuestController>> resourceAssembler;
+    private final GuestService guestService;
+
+    /**
+     * Autowire the below services into the controller.
+     *
+     * @param resourceAssembler {@link ServiceResourceAssembler}
+     * @param guestService      {@link GuestService}
+     */
+    public GuestController(ServiceResourceAssembler<Guest, Class<GuestController>> resourceAssembler, GuestService guestService) {
+        this.resourceAssembler = resourceAssembler;
+        this.guestService = guestService;
+    }
 
     /**
      * Registers the new {@link Guest} in the hotel system.
@@ -55,11 +70,12 @@ public class GuestController {
      */
     @ApiOperation(value = "Adds new hotel guest to the system.",
             notes = "Adds new hotel guest to the system and returns the location header. ")
-    @RequestMapping(path = "/api/add/guest", method = POST, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(path = ADD_GUEST, method = POST, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
     public Resource<Guest> registerNewGuest(@RequestBody Guest guest) {
+        LOGGER.info("Registering a new guest {}", guest);
         guestService.registerNewGuest(guest);
-        return resourceAssembler.toResource(guest);
+        return resourceAssembler.withController(GuestController.class).toResource(guest);
     }
 
     /**
@@ -69,9 +85,14 @@ public class GuestController {
      */
     @ApiOperation(value = "Books the room.",
             notes = "Books the room by the registered user id, hotel id, start date, end date, room number.")
-    @RequestMapping(path = "/api/add/booking", method = POST)
-    @ResponseStatus(OK)
+    @RequestMapping(path = ADD_BOOKING, method = POST)
+    @ResponseStatus(CREATED)
+    @ApiResponses({
+            @ApiResponse(code = HttpStatus.CREATED, message = "The room is already booked. "),
+            @ApiResponse(code = CONFLICT, message = "The room is already booked. "),
+            @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public void bookRoom(@RequestBody BookingRequest bookingRequest) {
+        LOGGER.info("New booking request is issued {}", bookingRequest);
         guestService.performBooking(bookingRequest);
     }
 
@@ -84,14 +105,19 @@ public class GuestController {
      */
     @ApiOperation(value = "Gets booked rooms for the guest id and specific date. ",
             notes = "Gets booked rooms for the guest id and specific date. ")
-    @RequestMapping(path = "/api/get/roombyguest/{guestId}/{date}", method = GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(path = ROOMS_BY_GUEST_AND_DATE, method = GET, produces = APPLICATION_JSON_VALUE)
+    @ApiResponses({
+            @ApiResponse(code = HttpStatus.FOUND, message = "Found the booked rooms. "),
+            @ApiResponse(code = NOT_FOUND, message = "No booked rooms were found. "),
+            @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     @ResponseStatus(FOUND)
     public List<Room> bookedRoomsByGuest(
             @ApiParam(required = true, value = "The UUID representation of the guest id. ")
             @PathVariable("guestId") UUID guestId,
             @PathVariable("date")
             @ApiParam(required = true, value = "Specific date to look at the booked rooms. ")
-            @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateToLookFor) {
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateToLookFor) {
+        LOGGER.info("Started looking for free rooms for the guest id {} and date {}", guestId, format(dateToLookFor));
         return guestService.findBookedRoomsForTheGuestIdAndDate(guestId, dateToLookFor);
     }
 }

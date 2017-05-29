@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra;
+package com.dataart.tmurzenkov.cassandra.service;
 
 import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByGuestAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByHotelAndDateDao;
@@ -40,6 +40,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * UTs for the {@link GuestServiceImpl}.
+ *
+ * @author tmurzenkov
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class GuestServiceTest {
     @Rule
@@ -70,6 +75,23 @@ public class GuestServiceTest {
         verify(byHotelAndDateDao).exists(eq(expectedRoomByHotelAndDate.getCompositeId()));
         verify(byHotelAndDateDao).insert(eq(expectedRoomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
+        verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));
+        verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));
+    }
+
+    @Test
+    public void shouldNotBookRoomForNullBookingRequest() {
+        final String exceptionMessage = "Cannot perform booking for empty booking request. ";
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage(exceptionMessage);
+
+        sut.performBooking(null);
+
+        verify(byHotelAndDateDao, never()).exists(any());
+        verify(byHotelAndDateDao, never()).insert(any());
+        verify(byGuestAndDateDao, never()).insert(any());
+        verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));
+        verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));
     }
 
     @Test
@@ -91,6 +113,8 @@ public class GuestServiceTest {
         verify(byHotelAndDateDao).exists(eq(expectedRoomByHotelAndDate.getCompositeId()));
         verify(byHotelAndDateDao, never()).insert(eq(expectedRoomByHotelAndDate));
         verify(byGuestAndDateDao, never()).insert(eq(expectedRoomByGuestAndDate));
+        verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));
+        verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));
     }
 
     @Test
@@ -160,7 +184,7 @@ public class GuestServiceTest {
         expectedGuest.setFirstName("Test name");
         expectedGuest.setLastName("Test last name");
 
-        when(guestDao.exists(expectedGuest.getCompositeId())).thenReturn(false);
+        when(guestDao.exists(eq(expectedGuest.getCompositeId()))).thenReturn(false);
         when(guestDao.insert(eq(expectedGuest))).thenReturn(expectedGuest);
 
         Guest actualGuest = sut.registerNewGuest(expectedGuest);

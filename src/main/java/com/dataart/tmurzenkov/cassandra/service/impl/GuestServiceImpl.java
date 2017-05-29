@@ -8,7 +8,6 @@ import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
-import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus.BOOKED;
-import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
+import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validatePresenceInDb;
 import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
@@ -74,6 +73,23 @@ public class GuestServiceImpl implements GuestService {
         return bookedRooms;
     }
 
+    @Override
+    public void performBooking(BookingRequest bookingRequest) {
+        validateBookingRequest(bookingRequest);
+        final RoomByHotelAndDate hotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
+        final RoomByGuestAndDate guestAndDate = new RoomByGuestAndDate(bookingRequest);
+        checkIfBooked(hotelAndDate);
+        guestAndDate.setConfirmationNumber(generateConfirmationNumber(bookingRequest));
+        roomByHotelAndDateDao.insert(hotelAndDate);
+        roomByGuestAndDateDao.insert(guestAndDate);
+    }
+
+    private void validateBookingRequest(BookingRequest bookingRequest) {
+        if (null == bookingRequest) {
+            throw new IllegalArgumentException("Cannot perform booking for empty booking request. ");
+        }
+    }
+
     private void validateSearchParameters(UUID guestId, LocalDate bookingDate) {
         if (null == guestId) {
             throw new IllegalArgumentException("Cannot perform search of the booked room for the null guest id ");
@@ -83,32 +99,16 @@ public class GuestServiceImpl implements GuestService {
         }
     }
 
-    @Override
-    public void performBooking(BookingRequest bookingRequest) {
-        final RoomByHotelAndDate hotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
-        final RoomByGuestAndDate guestAndDate = new RoomByGuestAndDate(bookingRequest);
-        checkIfBooked(hotelAndDate);
-        guestAndDate.setConfirmationNumber(generateConfirmationNumber(bookingRequest));
-        roomByHotelAndDateDao.insert(hotelAndDate);
-        roomByGuestAndDateDao.insert(guestAndDate);
-    }
-
     private void checkIfBooked(RoomByHotelAndDate roomByHotelAndDate) {
         final String exceptionMessage = format("The following room is already booked. Room number: '%s', hotel id: '%s',",
                 roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        validator()
-                .withCondition(basicEntity -> !roomByHotelAndDateDao.exists(basicEntity.getCompositeId()))
-                .onConditionFailureThrow(() -> new RecordExistsException(exceptionMessage))
-                .doValidate(roomByHotelAndDate);
+        validatePresenceInDb(roomByHotelAndDateDao, roomByHotelAndDate, exceptionMessage);
     }
 
     private void checkIfRegistered(Guest guest) {
         final String exceptionMessage = format("The guest information is already stored in DB. "
                 + "Guest id: '%s', name: '%s', surname: '%s'", guest.getId(), guest.getFirstName(), guest.getLastName());
-        validator()
-                .withCondition(basicEntity -> !guestDao.exists(basicEntity.getCompositeId()))
-                .onConditionFailureThrow(() -> new RecordExistsException(exceptionMessage))
-                .doValidate(guest);
+        validatePresenceInDb(guestDao, guest, exceptionMessage);
     }
 
     private Integer generateConfirmationNumber(BookingRequest bookingRequest) {

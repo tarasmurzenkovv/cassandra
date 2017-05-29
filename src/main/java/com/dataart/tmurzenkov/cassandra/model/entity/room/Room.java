@@ -93,8 +93,7 @@ public class Room extends BasicEntity {
         if (id != null ? !id.equals(room.id) : room.id != null) {
             return false;
         }
-
-        return roomNumber != null ? !roomNumber.equals(room.roomNumber) : room.roomNumber != null;
+        return roomNumber != null ? roomNumber.equals(room.roomNumber) : room.roomNumber == null;
     }
 
     @Override

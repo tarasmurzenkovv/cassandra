@@ -5,7 +5,6 @@ import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelByCityDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
-import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.HotelService;
 import org.slf4j.Logger;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
+import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validatePresenceInDb;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
@@ -50,9 +49,9 @@ public class HotelServiceImpl implements HotelService {
      */
     public Hotel addHotel(Hotel hotel) {
         LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
-        validate(hotel);
+        checkIfExist(hotel);
         final Hotel registeredHotel = hotelDao.insert(hotel);
-        hotelByCityDao.save(new HotelByCity(registeredHotel));
+        hotelByCityDao.insert(new HotelByCity(registeredHotel));
         LOGGER.info("Successfully saved the new entity into the DB: '{}'", registeredHotel);
         return registeredHotel;
     }
@@ -63,7 +62,7 @@ public class HotelServiceImpl implements HotelService {
             throw new IllegalArgumentException("Cannot find the hotels for the empty city name");
         }
         List<Hotel> hotelsForTheCity = hotelByCityDao.findAllHotelIdsInTheCity(city).stream()
-                .map(hotelProjection -> hotelDao.findOne(hotelProjection.getId())).collect(toList());
+                .map(hotelByCity -> hotelDao.findOne(hotelByCity.getId())).collect(toList());
         if (hotelsForTheCity.isEmpty()) {
             throw new RecordNotFoundException(format("Cannot find hotels for the given city '%s'", city));
         }
@@ -71,11 +70,8 @@ public class HotelServiceImpl implements HotelService {
         return hotelsForTheCity;
     }
 
-    private void validate(Hotel hotel) {
+    private void checkIfExist(Hotel hotel) {
         final String message = format("Such hotel information is already added to the data base '%s'", hotel);
-        validator()
-                .withCondition(h -> null != hotelDao.findOne(h.getCompositeId()))
-                .onConditionFailureThrow(() -> new RecordExistsException(message))
-                .doValidate(hotel);
+        validatePresenceInDb(hotelDao, hotel, message);
     }
 }

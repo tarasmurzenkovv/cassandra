@@ -16,8 +16,8 @@ public interface HotelByCityDao extends CassandraRepository<HotelByCity> {
      * Finds all {@link HotelByCity} for the given city name.
      *
      * @param cityName {@link String}
-     * @return {@link List} of {@link HotelProjection}
+     * @return {@link List} of {@link HotelByCityDao}
      */
     @Query("select id from hotels_by_city where city = ?0")
-    List<HotelProjection> findAllHotelIdsInTheCity(String cityName);
+    List<HotelByCity> findAllHotelIdsInTheCity(String cityName);
 }

@@ -52,6 +52,8 @@ public class HotelServiceTest {
         verify(validatorService).doValidate(eq(newHotel));
         verify(hotelDao).save(eq(newHotel));
         verify(hotelByCityDao).save(eq(newHotelByCity));*/
+
+
     }
 
     @Test

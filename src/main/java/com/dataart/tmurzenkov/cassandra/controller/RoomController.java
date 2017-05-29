@@ -66,8 +66,8 @@ public class RoomController {
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public Resource<Room> addRoomToTheHotel(@RequestBody Room room) {
         LOGGER.info("Going to add the following room into the data base '{}'", room);
-        roomService.addRoomToHotel(room);
-        return resourceAssembler.withController(RoomController.class).toResource(room);
+        Room addedRoom = roomService.addRoomToHotel(room);
+        return resourceAssembler.withController(RoomController.class).toResource(addedRoom);
     }
 
     /**

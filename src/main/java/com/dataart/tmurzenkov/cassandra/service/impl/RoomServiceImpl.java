@@ -48,7 +48,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room addRoomToHotel(Room room) {
         LOGGER.info("Going to register the new room '{}'", room);
-        validateRoom(room);
+        validatePassedRoom(room);
         Hotel one = hotelDao.findOne(room.getId());
         validateHotel(one);
         Room addedRoom = roomDao.insert(room);
@@ -70,7 +70,7 @@ public class RoomServiceImpl implements RoomService {
         return freeRooms;
     }
 
-    private void validateRoom(Room room) {
+    private void validatePassedRoom(Room room) {
         if (null == room) {
             throw new IllegalArgumentException("Cannot add the the room. It is empty. ");
         }

@@ -46,8 +46,8 @@ public class RecordValidator<T extends BasicEntity, E extends RuntimeException> 
     }
 
     @Override
-    public RecordValidator<T, E> onConditionFailureThrow(Supplier<E> exception) {
-        this.exceptionToThrow = exception.get();
+    public RecordValidator<T, E> onConditionFailureThrow(Supplier<E> exceptionSupplier) {
+        this.exceptionToThrow = exceptionSupplier.get();
         return this;
     }
 }

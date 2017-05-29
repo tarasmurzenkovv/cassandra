@@ -47,6 +47,7 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.id = bookingRequest.getHotelId();
         this.bookingDate = bookingRequest.getBookingDate();
         this.status = bookingStatus;
+        this.roomNumber = bookingRequest.getRoomNumber();
     }
 
     @Override
@@ -95,5 +96,37 @@ public class RoomByHotelAndDate extends BasicEntity {
                 + ", status=" + status
                 + ", roomNumber=" + roomNumber
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        RoomByHotelAndDate that = (RoomByHotelAndDate) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (bookingDate != null ? !bookingDate.equals(that.bookingDate) : that.bookingDate != null) {
+            return false;
+        }
+        if (status != that.status) {
+            return false;
+        }
+        return roomNumber != null ? roomNumber.equals(that.roomNumber) : that.roomNumber == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (bookingDate != null ? bookingDate.hashCode() : 0);
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0);
+        return result;
     }
 }

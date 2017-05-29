@@ -5,6 +5,7 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.Future;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class BookingRequest {
     @ApiModelProperty(value = "The UUID representation of the hotel id", required = true, dataType = "String representation of the UUID. ")
     private UUID hotelId;
     @NotNull(message = "The room number must not be null. ")
+    @Min(message = "The room number must be more than zero. ", value = 1)
     @ApiModelProperty(value = "The room number", required = true, dataType = "String representation of the integer. ")
     private Integer roomNumber;
     @NotNull(message = "The booking date must not be null. ")

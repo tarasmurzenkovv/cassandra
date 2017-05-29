@@ -68,7 +68,7 @@ public class HotelController {
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public List<Resource<Hotel>> getAllHotelsInTheCity(@ApiParam(value = "Name of the city", required = true)
                                                        @PathVariable("city") String city) {
-        LOGGER.info("Going to look for all hotels in the city {}", city);
+        LOGGER.info("Going to look for all hotels in the city '{}'", city);
         List<Hotel> allHotelsInTheCity = hotelServiceImpl.findAllHotelsInTheCity(city);
         return resourceAssembler.toResource(allHotelsInTheCity);
     }
@@ -89,7 +89,7 @@ public class HotelController {
             @ApiParam(value = "Hotel dto. ", required = true)
             @RequestBody Hotel hotel) {
         LOGGER.info("Going to add the following hotel to the system '{}'", hotel);
-        Hotel saved = hotelServiceImpl.addHotel(hotel);
-        return resourceAssembler.withController(HotelController.class).toResource(saved);
+        Hotel addedHotel = hotelServiceImpl.addHotel(hotel);
+        return resourceAssembler.withController(HotelController.class).toResource(addedHotel);
     }
 }

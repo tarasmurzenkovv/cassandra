@@ -42,6 +42,19 @@ public class RoomByGuestAndDate extends BasicEntity {
     /**
      * Constructor.
      *
+     * @param id          guest id
+     * @param bookingDate booking date
+     * @param roomNumber  room number
+     */
+    public RoomByGuestAndDate(UUID id, LocalDate bookingDate, Integer roomNumber) {
+        this.id = id;
+        this.bookingDate = bookingDate;
+        this.roomNumber = roomNumber;
+    }
+
+    /**
+     * Constructor.
+     *
      * @param bookingRequest {@link BookingRequest}
      */
     public RoomByGuestAndDate(BookingRequest bookingRequest) {
@@ -105,5 +118,41 @@ public class RoomByGuestAndDate extends BasicEntity {
                 + ", hotelId=" + hotelId
                 + ", confirmationNumber=" + confirmationNumber
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        RoomByGuestAndDate that = (RoomByGuestAndDate) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (bookingDate != null ? !bookingDate.equals(that.bookingDate) : that.bookingDate != null) {
+            return false;
+        }
+        if (roomNumber != null ? !roomNumber.equals(that.roomNumber) : that.roomNumber != null) {
+            return false;
+        }
+        if (hotelId != null ? !hotelId.equals(that.hotelId) : that.hotelId != null) {
+            return false;
+        }
+        return confirmationNumber != null ? confirmationNumber.equals(that.confirmationNumber) : that.confirmationNumber == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (bookingDate != null ? bookingDate.hashCode() : 0);
+        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0);
+        result = 31 * result + (hotelId != null ? hotelId.hashCode() : 0);
+        result = 31 * result + (confirmationNumber != null ? confirmationNumber.hashCode() : 0);
+        return result;
     }
 }

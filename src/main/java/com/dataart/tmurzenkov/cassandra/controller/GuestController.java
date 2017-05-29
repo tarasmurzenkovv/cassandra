@@ -73,9 +73,9 @@ public class GuestController {
     @RequestMapping(path = ADD_GUEST, method = POST, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
     public Resource<Guest> registerNewGuest(@RequestBody Guest guest) {
-        LOGGER.info("Registering a new guest {}", guest);
-        guestService.registerNewGuest(guest);
-        return resourceAssembler.withController(GuestController.class).toResource(guest);
+        LOGGER.info("Registering a new guest '{}'", guest);
+        final Guest registeredGuest = guestService.registerNewGuest(guest);
+        return resourceAssembler.withController(GuestController.class).toResource(registeredGuest);
     }
 
     /**
@@ -92,7 +92,7 @@ public class GuestController {
             @ApiResponse(code = CONFLICT, message = "The room is already booked. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public void bookRoom(@RequestBody BookingRequest bookingRequest) {
-        LOGGER.info("New booking request is issued {}", bookingRequest);
+        LOGGER.info("New booking request is issued '{}'", bookingRequest);
         guestService.performBooking(bookingRequest);
     }
 
@@ -117,7 +117,7 @@ public class GuestController {
             @PathVariable("date")
             @ApiParam(required = true, value = "Specific date to look at the booked rooms. ")
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateToLookFor) {
-        LOGGER.info("Started looking for free rooms for the guest id {} and date {}", guestId, format(dateToLookFor));
+        LOGGER.info("Started looking for free rooms for the guest id '{}' and date '{}'", guestId, format(dateToLookFor));
         return guestService.findBookedRoomsForTheGuestIdAndDate(guestId, dateToLookFor);
     }
 }

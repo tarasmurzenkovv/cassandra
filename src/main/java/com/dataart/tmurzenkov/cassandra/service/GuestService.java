@@ -37,6 +37,7 @@ public interface GuestService {
      * Performs the actual booking.
      *
      * @param bookingRequest {@link BookingRequest}
+     * @return {@link BookingRequest}
      */
-    void performBooking(BookingRequest bookingRequest);
+    BookingRequest performBooking(BookingRequest bookingRequest);
 }

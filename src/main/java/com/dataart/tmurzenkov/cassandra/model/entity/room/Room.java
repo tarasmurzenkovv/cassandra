@@ -1,6 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.model.entity.room;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
@@ -59,6 +60,7 @@ public class Room extends BasicEntity {
 
 
     @Override
+    @JsonIgnore
     public MapId getCompositeId() {
         return BasicMapId.id("id", this.id).with("roomNumber", this.roomNumber);
     }

@@ -1,13 +1,9 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
-import com.dataart.tmurzenkov.cassandra.TestUtils;
-import com.dataart.tmurzenkov.cassandra.controller.uri.Uris;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.HotelServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,11 +18,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.UUID;
 
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildEmptyHotel;
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildHotel;
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildHotels;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HttpResponseTest.build;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.asJson;
-import static com.dataart.tmurzenkov.cassandra.TestUtils.buildHotel;
-import static com.dataart.tmurzenkov.cassandra.TestUtils.buildEmptyHotel;
-import static com.dataart.tmurzenkov.cassandra.TestUtils.buildHotels;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.ADD_HOTEL;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.HOTELS_IN_THE_CITY;
 import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
@@ -44,6 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * UTs for the {@link HotelController}.
+ *
+ * @author tmurzenkov
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class HotelControllerTest {
     @Mock
@@ -54,6 +54,9 @@ public class HotelControllerTest {
     private HotelController sut;
     private MockMvc mockMvc;
 
+    /**
+     * Inits {@link MockMvc}.
+     */
     @Before
     public void init() {
         mockMvc = MockMvcBuilders

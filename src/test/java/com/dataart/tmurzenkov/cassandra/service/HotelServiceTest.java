@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.TestUtils.buildAddress;
-import static com.dataart.tmurzenkov.cassandra.TestUtils.buildHotel;
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildAddress;
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildHotel;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;

@@ -9,10 +9,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cassandra.support.exception.CassandraInvalidQueryException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.*;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.ALREADY_BOOKED;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.RECORD_ALREADY_EXISTS;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.RECORD_NOT_EXISTS;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.UNKNOWN_EXCEPTION;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.INVALID_PARAMETERS;
 
 /**
  * Intercepts the application specific exceptions.
@@ -23,12 +29,18 @@ import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor
 public class ExceptionInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionInterceptor.class);
 
+    /**
+     * Constants.
+     *
+     * @author tmurzenkov
+     */
     public interface Constants {
         String RECORD_NOT_EXISTS = "RECORD_NOT_EXISTS";
         String RECORD_ALREADY_EXISTS = "RECORD_ALREADY_EXISTS";
         String ALREADY_BOOKED = "ALREADY_BOOKED";
         String QUERY_EXECUTION_EXCEPTION = "QUERY_EXECUTION_EXCEPTION";
         String UNKNOWN_EXCEPTION = "UNKNOWN_EXCEPTION";
+        String INVALID_PARAMETERS = "INVALID_PARAMETERS";
     }
 
     /**
@@ -84,6 +96,18 @@ public class ExceptionInterceptor {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorDto> handle(IllegalArgumentException e) {
         return logAndMake(e, HttpStatus.BAD_REQUEST, QUERY_EXECUTION_EXCEPTION);
+    }
+
+    /**
+     * Logs {@link MethodArgumentNotValidException} and transforms to {@link ResponseEntity} with {@link ErrorDto}.
+     *
+     * @param e {@link MethodArgumentNotValidException}
+     * @return {@link ResponseEntity} with status <code>HttpStatus.INTERNAL_SERVER_ERROR</code>
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorDto> handle(MethodArgumentNotValidException e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ErrorDto(e, INVALID_PARAMETERS), HttpStatus.BAD_REQUEST);
     }
 
     /**

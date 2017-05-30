@@ -31,7 +31,7 @@ public class RoomByGuestAndDate extends BasicEntity {
     @Column("hotel_id")
     private UUID hotelId;
     @Column("confirmation_number")
-    private Integer confirmationNumber;
+    private String confirmationNumber;
 
     /**
      * Constructor.
@@ -101,11 +101,11 @@ public class RoomByGuestAndDate extends BasicEntity {
         this.bookingDate = bookingDate;
     }
 
-    public Integer getConfirmationNumber() {
+    public String getConfirmationNumber() {
         return confirmationNumber;
     }
 
-    public void setConfirmationNumber(Integer confirmationNumber) {
+    public void setConfirmationNumber(String confirmationNumber) {
         this.confirmationNumber = confirmationNumber;
     }
 

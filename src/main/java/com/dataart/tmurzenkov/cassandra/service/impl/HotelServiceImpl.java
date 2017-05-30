@@ -5,6 +5,7 @@ import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelByCityDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
+import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.HotelService;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validatePresenceInDb;
+import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
@@ -104,6 +105,9 @@ public class HotelServiceImpl implements HotelService {
 
     private void checkIfExist(Hotel hotel) {
         final String message = format("Such hotel information is already added to the data base '%s'", hotel);
-        validatePresenceInDb(hotelDao, hotel, message);
+        validator()
+                .withCondition(e -> hotelDao.exists(e.getCompositeId()))
+                .onConditionFailureThrow(() -> new RecordExistsException(message))
+                .doValidate(hotel);
     }
 }

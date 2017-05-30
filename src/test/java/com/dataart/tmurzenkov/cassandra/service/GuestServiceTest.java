@@ -3,6 +3,7 @@ package com.dataart.tmurzenkov.cassandra.service;
 import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByGuestAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
@@ -27,6 +28,7 @@ import java.util.stream.IntStream;
 import static com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus.BOOKED;
 import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static java.time.LocalDate.now;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
@@ -52,6 +54,8 @@ public class GuestServiceTest {
     @Mock
     private GuestDao guestDao;
     @Mock
+    private RoomDao roomDao;
+    @Mock
     private RoomByHotelAndDateDao byHotelAndDateDao;
     @Mock
     private RoomByGuestAndDateDao byGuestAndDateDao;
@@ -64,11 +68,12 @@ public class GuestServiceTest {
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
         final RoomByHotelAndDate expectedRoomByHotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
-        expectedRoomByGuestAndDate.setConfirmationNumber(bookingRequest.hashCode());
+        expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
         when(byHotelAndDateDao.insert(any(RoomByHotelAndDate.class))).thenReturn(expectedRoomByHotelAndDate);
         when(byHotelAndDateDao.exists(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(false);
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
+        when(roomDao.exists(any())).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 
@@ -107,6 +112,7 @@ public class GuestServiceTest {
         thrown.expectMessage(exceptionMessage);
 
         when(byHotelAndDateDao.exists(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(true);
+        when(roomDao.exists(any())).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 

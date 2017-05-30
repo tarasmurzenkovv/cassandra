@@ -3,11 +3,13 @@ package com.dataart.tmurzenkov.cassandra.service.impl;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByGuestAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
+import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import org.slf4j.Logger;
@@ -19,10 +21,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus.BOOKED;
-import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validatePresenceInDb;
+import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
 import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -34,6 +38,7 @@ import static java.util.stream.Collectors.toList;
 public class GuestServiceImpl implements GuestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestServiceImpl.class);
     private final GuestDao guestDao;
+    private final RoomDao roomDao;
     private final RoomByGuestAndDateDao roomByGuestAndDateDao;
     private final RoomByHotelAndDateDao roomByHotelAndDateDao;
 
@@ -42,20 +47,41 @@ public class GuestServiceImpl implements GuestService {
      *
      * @param guestDao              {@link GuestDao}
      * @param roomByGuestAndDateDao {@link RoomByGuestAndDateDao}
+     * @param roomDao               {@link RoomDao}
      * @param roomByHotelAndDateDao {@link RoomByHotelAndDateDao}
      */
-    public GuestServiceImpl(GuestDao guestDao, RoomByGuestAndDateDao roomByGuestAndDateDao, RoomByHotelAndDateDao roomByHotelAndDateDao) {
+    public GuestServiceImpl(GuestDao guestDao,
+                            RoomDao roomDao,
+                            RoomByGuestAndDateDao roomByGuestAndDateDao,
+                            RoomByHotelAndDateDao roomByHotelAndDateDao) {
         this.guestDao = guestDao;
         this.roomByGuestAndDateDao = roomByGuestAndDateDao;
         this.roomByHotelAndDateDao = roomByHotelAndDateDao;
+        this.roomDao = roomDao;
     }
 
     @Override
     public Guest registerNewGuest(Guest guest) {
+        validateGuest(guest);
         checkIfRegistered(guest);
         final Guest savedGuestInfo = guestDao.insert(guest);
         LOGGER.info("Successfully registered the new guest '{}'", savedGuestInfo);
         return savedGuestInfo;
+    }
+
+    private void validateGuest(Guest guest) {
+        if (null == guest) {
+            throw new IllegalArgumentException("Cannot register the empty guest info. ");
+        }
+        if (null == guest.getId()) {
+            throw new IllegalArgumentException("Cannot register guest info with empty id. ");
+        }
+        if (isEmpty(guest.getFirstName())) {
+            throw new IllegalArgumentException("Cannot register guest info with empty first name. ");
+        }
+        if (isEmpty(guest.getLastName())) {
+            throw new IllegalArgumentException("Cannot register guest info with empty last name. ");
+        }
     }
 
     @Override
@@ -74,14 +100,16 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
-    public void performBooking(BookingRequest bookingRequest) {
+    public BookingRequest performBooking(BookingRequest bookingRequest) {
         validateBookingRequest(bookingRequest);
         final RoomByHotelAndDate hotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
         final RoomByGuestAndDate guestAndDate = new RoomByGuestAndDate(bookingRequest);
+        checkIfExists(hotelAndDate);
         checkIfBooked(hotelAndDate);
-        guestAndDate.setConfirmationNumber(generateConfirmationNumber(bookingRequest));
+        guestAndDate.setConfirmationNumber(valueOf(generateConfirmationNumber(bookingRequest)));
         roomByHotelAndDateDao.insert(hotelAndDate);
         roomByGuestAndDateDao.insert(guestAndDate);
+        return bookingRequest;
     }
 
     private void validateBookingRequest(BookingRequest bookingRequest) {
@@ -99,16 +127,32 @@ public class GuestServiceImpl implements GuestService {
         }
     }
 
+    private void checkIfExists(RoomByHotelAndDate roomByHotelAndDate) {
+        final String exceptionMessage = format("The following room does not exists. Room number: '%s', hotel id: '%s',",
+                roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
+        final Room room = new Room(roomByHotelAndDate);
+        validator()
+                .withCondition(e -> !roomDao.exists(e.getCompositeId()))
+                .onConditionFailureThrow(() -> new RecordNotFoundException(exceptionMessage))
+                .doValidate(room);
+    }
+
     private void checkIfBooked(RoomByHotelAndDate roomByHotelAndDate) {
         final String exceptionMessage = format("The following room is already booked. Room number: '%s', hotel id: '%s',",
                 roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        validatePresenceInDb(roomByHotelAndDateDao, roomByHotelAndDate, exceptionMessage);
+        validator()
+                .withCondition(e -> roomByHotelAndDateDao.exists(e.getCompositeId()))
+                .onConditionFailureThrow(() -> new RecordExistsException(exceptionMessage))
+                .doValidate(roomByHotelAndDate);
     }
 
     private void checkIfRegistered(Guest guest) {
         final String exceptionMessage = format("The guest information is already stored in DB. "
                 + "Guest id: '%s', name: '%s', surname: '%s'", guest.getId(), guest.getFirstName(), guest.getLastName());
-        validatePresenceInDb(guestDao, guest, exceptionMessage);
+        validator()
+                .withCondition(e -> guestDao.exists(e.getCompositeId()))
+                .onConditionFailureThrow(() -> new RecordExistsException(exceptionMessage))
+                .doValidate(guest);
     }
 
     private Integer generateConfirmationNumber(BookingRequest bookingRequest) {

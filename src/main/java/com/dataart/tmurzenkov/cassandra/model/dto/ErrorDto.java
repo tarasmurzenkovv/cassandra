@@ -1,5 +1,11 @@
 package com.dataart.tmurzenkov.cassandra.model.dto;
 
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+
+import static java.util.stream.Collectors.joining;
+
 /**
  * Dto to hold information about the exceptions/errors.
  *
@@ -8,6 +14,21 @@ package com.dataart.tmurzenkov.cassandra.model.dto;
 public class ErrorDto {
     private String exceptionMessage;
     private String exceptionDescription;
+
+    /**
+     * Constructs DTO from {@link MethodArgumentNotValidException}.
+     *
+     * @param e {@link MethodArgumentNotValidException}
+     * @param exceptionDescription {@link String} short camel case exception description.
+     */
+    public ErrorDto(MethodArgumentNotValidException e, String exceptionDescription) {
+        this.exceptionMessage = e.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .map(ObjectError::getDefaultMessage)
+                .collect(joining("; "));
+        this.exceptionDescription = exceptionDescription;
+    }
 
     /**
      * Constructs DTO from {@link RuntimeException}.
@@ -35,5 +56,4 @@ public class ErrorDto {
     public void setExceptionDescription(String exceptionDescription) {
         this.exceptionDescription = exceptionDescription;
     }
-
 }

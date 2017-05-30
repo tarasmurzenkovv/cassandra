@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -72,6 +73,11 @@ public class GuestController {
             notes = "Adds new hotel guest to the system and returns the location header. ")
     @RequestMapping(path = ADD_GUEST, method = POST, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
+    @ApiResponses({
+            @ApiResponse(code = HttpStatus.CREATED, message = "Registered a new guest information. "),
+            @ApiResponse(code = HttpStatus.CONFLICT, message = "Such guest info is already present in DB. "),
+            @ApiResponse(code = HttpStatus.BAD_REQUEST, message = "Some arguments are invalid in guest info dto. "),
+    })
     public Resource<Guest> registerNewGuest(@RequestBody Guest guest) {
         LOGGER.info("Registering a new guest '{}'", guest);
         final Guest registeredGuest = guestService.registerNewGuest(guest);
@@ -82,18 +88,19 @@ public class GuestController {
      * Books the room by the registered user id, hotel id, start date, end date, room number.
      *
      * @param bookingRequest {@link BookingRequest} the id of the hotel
+     * @return {@link Resource}
      */
     @ApiOperation(value = "Books the room.",
             notes = "Books the room by the registered user id, hotel id, start date, end date, room number.")
-    @RequestMapping(path = ADD_BOOKING, method = POST)
+    @RequestMapping(path = ADD_BOOKING, method = POST, consumes = "application/json", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(CREATED)
     @ApiResponses({
-            @ApiResponse(code = HttpStatus.CREATED, message = "The room is already booked. "),
+            @ApiResponse(code = HttpStatus.CREATED, message = "The room has been booked successfully. "),
             @ApiResponse(code = CONFLICT, message = "The room is already booked. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
-    public void bookRoom(@RequestBody BookingRequest bookingRequest) {
+    public Resource<BookingRequest> bookRoom(@RequestBody @Valid BookingRequest bookingRequest) {
         LOGGER.info("New booking request is issued '{}'", bookingRequest);
-        guestService.performBooking(bookingRequest);
+        return new Resource<>(guestService.performBooking(bookingRequest));
     }
 
     /**
@@ -113,10 +120,10 @@ public class GuestController {
     @ResponseStatus(FOUND)
     public List<Room> bookedRoomsByGuest(
             @ApiParam(required = true, value = "The UUID representation of the guest id. ")
-            @PathVariable("guestId") UUID guestId,
+            @PathVariable("guestId") @Valid UUID guestId,
             @PathVariable("date")
             @ApiParam(required = true, value = "Specific date to look at the booked rooms. ")
-            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateToLookFor) {
+            @DateTimeFormat(pattern = "yyyy-MM-dd") @Valid LocalDate dateToLookFor) {
         LOGGER.info("Started looking for free rooms for the guest id '{}' and date '{}'", guestId, format(dateToLookFor));
         return guestService.findBookedRoomsForTheGuestIdAndDate(guestId, dateToLookFor);
     }

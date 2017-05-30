@@ -97,4 +97,32 @@ public class Guest extends BasicEntity {
                 + ", title='" + title + '\''
                 + '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Guest guest = (Guest) o;
+
+        if (id != null ? !id.equals(guest.id) : guest.id != null) {
+            return false;
+        }
+        if (firstName != null ? !firstName.equals(guest.firstName) : guest.firstName != null) {
+            return false;
+        }
+        return lastName != null ? lastName.equals(guest.lastName) : guest.lastName == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
+        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+        return result;
+    }
 }

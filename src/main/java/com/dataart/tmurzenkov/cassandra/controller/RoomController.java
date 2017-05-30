@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.CREATED;
@@ -59,12 +60,12 @@ public class RoomController {
      * @return {@link Resource}
      */
     @ApiOperation(value = "Adds new room to the system.", notes = "Adds new hotel room to the system and returns the location header. ")
-    @RequestMapping(path = ADD_ROOM, method = POST, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(path = ADD_ROOM, method = POST, consumes = "application/json", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponses({
             @ApiResponse(code = CREATED, message = "Add room to the hotel. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
-    public Resource<Room> addRoomToTheHotel(@RequestBody Room room) {
+    public Resource<Room> addRoomToTheHotel(@RequestBody @Valid Room room) {
         LOGGER.info("Going to add the following room into the data base '{}'", room);
         Room addedRoom = roomService.addRoomToHotel(room);
         return resourceAssembler.withController(RoomController.class).toResource(addedRoom);
@@ -83,7 +84,7 @@ public class RoomController {
             @ApiResponse(code = FOUND, message = "Found free rooms in the hotel. "),
             @ApiResponse(code = NOT_FOUND, message = "Not found free rooms in the hotel. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
-    public List<Resource<Room>> findFreeRooms(@RequestBody SearchRequest searchRequest) {
+    public List<Resource<Room>> findFreeRooms(@RequestBody @Valid SearchRequest searchRequest) {
         LOGGER.info("Going to find the free rooms for the following request: '{}'", searchRequest);
         List<Room> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(searchRequest);
         return resourceAssembler.toResource(freeRoomsByHotelId);

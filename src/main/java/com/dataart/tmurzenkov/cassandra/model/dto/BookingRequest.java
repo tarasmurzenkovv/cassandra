@@ -1,10 +1,13 @@
 package com.dataart.tmurzenkov.cassandra.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.Future;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -24,14 +27,36 @@ public class BookingRequest {
     @ApiModelProperty(value = "The UUID representation of the hotel id", required = true, dataType = "String representation of the UUID. ")
     private UUID hotelId;
     @NotNull(message = "The room number must not be null. ")
-    @Min(message = "The room number must be more than zero. ", value = 1)
+    @Min(message = "The room number must be more than zero. ", value = 0)
     @ApiModelProperty(value = "The room number", required = true, dataType = "String representation of the integer. ")
     private Integer roomNumber;
     @NotNull(message = "The booking date must not be null. ")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "The booking date", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
-    @Future(message = "Cannot book the room for the past date")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate bookingDate;
+
+    /**
+     * Constructor.
+     */
+    public BookingRequest() {
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param guestId     {@link UUID}
+     * @param hotelId     {@link UUID}
+     * @param roomNumber  {@link Integer}
+     * @param bookingDate {@link LocalDate}
+     */
+    public BookingRequest(UUID guestId, UUID hotelId, Integer roomNumber, LocalDate bookingDate) {
+        this.guestId = guestId;
+        this.hotelId = hotelId;
+        this.roomNumber = roomNumber;
+        this.bookingDate = bookingDate;
+    }
 
     public UUID getGuestId() {
         return guestId;

@@ -151,8 +151,10 @@ public class HotelServiceTest {
         address.setCity(cityName);
         final Hotel hilton = new Hotel();
         hilton.setAddress(address);
+        hilton.setId(UUID.randomUUID());
         final Hotel redisson = new Hotel();
         redisson.setAddress(address);
+        redisson.setId(UUID.randomUUID());
 
         hotels.add(hilton);
         hotels.add(redisson);

@@ -48,9 +48,7 @@ public class HotelServiceImpl implements HotelService {
      * @return {@link Hotel}
      */
     public Hotel addHotel(Hotel hotel) {
-        if (null == hotel) {
-            throw new IllegalArgumentException("Cannot add the empty hotel info. ");
-        }
+        validateHotelInfo(hotel);
         LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
         checkIfExist(hotel);
         final Hotel registeredHotel = hotelDao.insert(hotel);
@@ -71,6 +69,37 @@ public class HotelServiceImpl implements HotelService {
         }
         LOGGER.info("Found the following hotels '{}' for the city '{}'", makeString(hotelsForTheCity), city);
         return hotelsForTheCity;
+    }
+
+    private void validateHotelInfo(Hotel hotel) {
+        if (null == hotel) {
+            throw new IllegalArgumentException("Cannot add the empty hotel info. ");
+        }
+        if (null == hotel.getId()) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty id. ");
+        }
+        if (isEmpty(hotel.getName())) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty name. ");
+        }
+        if (isEmpty(hotel.getPhone())) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty phone field. ");
+        }
+        validateHotelAddress(hotel);
+    }
+
+    private void validateHotelAddress(Hotel hotel) {
+        if (null == hotel.getAddress()) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty address info. ");
+        }
+        if (isEmpty(hotel.getAddress().getCity())) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty city. ");
+        }
+        if (isEmpty(hotel.getAddress().getCountry())) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty country. ");
+        }
+        if (isEmpty(hotel.getAddress().getPostalCode())) {
+            throw new IllegalArgumentException("Cannot add the hotel with empty postal code. ");
+        }
     }
 
     private void checkIfExist(Hotel hotel) {

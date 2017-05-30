@@ -32,20 +32,12 @@ public class Hotel extends BasicEntity {
     @FrozenValue
     private Address address = new Address();
 
-    /**
-     * Constructor. Internally, it assigns random {@link UUID} to the entity partitioning id.
-     */
-    public Hotel() {
-        this.id = UUID.randomUUID();
-    }
-
     @Override
     @JsonIgnore
     public MapId getCompositeId() {
         return new BasicMapId().with("id", this.id).with("name", this.name);
     }
 
-    @JsonIgnore
     public UUID getId() {
         return id;
     }

@@ -3,6 +3,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 import com.dataart.tmurzenkov.cassandra.TestUtils;
 import com.dataart.tmurzenkov.cassandra.controller.uri.Uris;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
+import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.HotelServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,16 +23,20 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.UUID;
 
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HttpResponseTest.build;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.asJson;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.buildHotel;
+import static com.dataart.tmurzenkov.cassandra.TestUtils.buildEmptyHotel;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.buildHotels;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.ADD_HOTEL;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.HOTELS_IN_THE_CITY;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
 import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,7 +56,10 @@ public class HotelControllerTest {
 
     @Before
     public void init() {
-        mockMvc = MockMvcBuilders.standaloneSetup(sut).build();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(sut)
+                .setControllerAdvice(new ExceptionInterceptor())
+                .build();
     }
 
     @Test
@@ -74,19 +83,54 @@ public class HotelControllerTest {
     }
 
     @Test
-    public void shouldNotAddNullHotelToTheSystem() throws Exception {
-        final Hotel hotel = null;
+    public void shouldNotAddHotelWithNullId() throws Exception {
+        final Hotel hotel = buildEmptyHotel();
+        final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty id. ");
+
+        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(asJson(build(exception, QUERY_EXECUTION_EXCEPTION, BAD_REQUEST).getBody())));
     }
 
     @Test
-    public void shouldNotAdd() throws Exception {
-        final Hotel hotel = null;
+    public void shouldNotAddHotelWithEmptyName() throws Exception {
+        final Hotel hotel = buildHotel(UUID.randomUUID());
+        hotel.setName("");
+        final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty name. ");
+
+        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(asJson(build(exception, QUERY_EXECUTION_EXCEPTION, BAD_REQUEST).getBody())));
+    }
+
+    @Test
+    public void shouldNotAddHotelWithEmptyPhone() throws Exception {
+        final Hotel hotel = buildHotel(UUID.randomUUID());
+        hotel.setPhone("");
+        final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty phone field. ");
+
+        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
+        mockMvc
+                .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(asJson(build(exception, QUERY_EXECUTION_EXCEPTION, BAD_REQUEST).getBody())));
+    }
+
+    @Test
+    public void shouldNotAddHotelWithEmptyAddress() throws Exception {
+        final Hotel hotel = buildHotel(UUID.randomUUID());
+        hotel.setAddress(null);
+        final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty address info. ");
+
+        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
+        mockMvc
+                .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(asJson(build(exception, QUERY_EXECUTION_EXCEPTION, BAD_REQUEST).getBody())));
     }
 
 

@@ -45,7 +45,8 @@ public class ServiceResourceAssembler<T extends BasicEntity, C> implements Resou
     @Override
     public Resource<T> toResource(T basicEntity) {
         Resource<T> resource = new Resource<>(basicEntity);
-        resource.add(linkTo(controllerClass).slash(basicEntity.getId()).withSelfRel());
+        resource.add(
+                linkTo(controllerClass).slash(basicEntity.getId()).withSelfRel());
         return resource;
     }
 }

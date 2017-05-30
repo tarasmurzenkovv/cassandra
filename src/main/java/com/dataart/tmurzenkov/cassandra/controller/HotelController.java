@@ -62,6 +62,7 @@ public class HotelController {
      */
     @ApiOperation(value = "Finds all hotels in the city.", notes = "Finds all hotels in the city. ")
     @RequestMapping(path = HOTELS_IN_THE_CITY, method = GET, produces = APPLICATION_JSON_VALUE)
+    @ResponseStatus(value = HttpStatus.FOUND)
     @ApiResponses({
             @ApiResponse(code = FOUND, message = "Found all hotels for the city name. "),
             @ApiResponse(code = NOT_FOUND, message = "Not found all hotels for the city name. "),

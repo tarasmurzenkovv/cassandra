@@ -48,6 +48,9 @@ public class HotelServiceImpl implements HotelService {
      * @return {@link Hotel}
      */
     public Hotel addHotel(Hotel hotel) {
+        if (null == hotel) {
+            throw new IllegalArgumentException("Cannot add the empty hotel info. ");
+        }
         LOGGER.info("Going to save the following entity into the DB: '{}'", hotel);
         checkIfExist(hotel);
         final Hotel registeredHotel = hotelDao.insert(hotel);

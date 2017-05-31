@@ -24,9 +24,9 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 public class RoomByGuestAndDate extends BasicEntity {
     @PrimaryKeyColumn(name = "guest_id", type = PARTITIONED)
     private UUID id;
-    @PrimaryKeyColumn(name = "booking_date", type = CLUSTERED, ordering = DESCENDING)
+    @PrimaryKeyColumn(name = "booking_date", type = PARTITIONED)
     private LocalDate bookingDate;
-    @Column("room_number")
+    @PrimaryKeyColumn(name = "room_number", type = CLUSTERED, ordering = DESCENDING)
     private Integer roomNumber;
     @Column("hotel_id")
     private UUID hotelId;

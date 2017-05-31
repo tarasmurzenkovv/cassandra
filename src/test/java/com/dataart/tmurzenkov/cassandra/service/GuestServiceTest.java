@@ -71,13 +71,12 @@ public class GuestServiceTest {
         expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
         when(byHotelAndDateDao.insert(any(RoomByHotelAndDate.class))).thenReturn(expectedRoomByHotelAndDate);
-        when(byHotelAndDateDao.exists(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(false);
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
         when(roomDao.exists(any())).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 
-        verify(byHotelAndDateDao).exists(eq(expectedRoomByHotelAndDate.getCompositeId()));
+        verify(byHotelAndDateDao).findOne(eq(expectedRoomByHotelAndDate.getCompositeId()));
         verify(byHotelAndDateDao).insert(eq(expectedRoomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
         verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));
@@ -111,12 +110,12 @@ public class GuestServiceTest {
         thrown.expect(RecordExistsException.class);
         thrown.expectMessage(exceptionMessage);
 
-        when(byHotelAndDateDao.exists(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(true);
+        when(byHotelAndDateDao.findOne(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(expectedRoomByHotelAndDate);
         when(roomDao.exists(any())).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 
-        verify(byHotelAndDateDao).exists(eq(expectedRoomByHotelAndDate.getCompositeId()));
+        verify(byHotelAndDateDao).findOne(eq(expectedRoomByHotelAndDate.getCompositeId()));
         verify(byHotelAndDateDao, never()).insert(eq(expectedRoomByHotelAndDate));
         verify(byGuestAndDateDao, never()).insert(eq(expectedRoomByGuestAndDate));
         verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));

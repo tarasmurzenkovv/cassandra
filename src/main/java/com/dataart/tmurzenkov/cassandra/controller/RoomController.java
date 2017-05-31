@@ -78,7 +78,7 @@ public class RoomController {
      * @return {@link List} of {@link Resource} of {@link Room}
      */
     @ApiOperation(value = "Finds free rooms.", notes = "Finds free rooms by hotel id")
-    @RequestMapping(path = GET_FREE_ROOMS, method = GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(path = GET_FREE_ROOMS, method = POST, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.FOUND)
     @ApiResponses({
             @ApiResponse(code = FOUND, message = "Found free rooms in the hotel. "),

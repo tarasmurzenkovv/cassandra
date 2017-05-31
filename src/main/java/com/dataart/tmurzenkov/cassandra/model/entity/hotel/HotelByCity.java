@@ -40,7 +40,7 @@ public class HotelByCity extends BasicEntity {
 
     @Override
     public MapId getCompositeId() {
-        return BasicMapId.id("id", this.id).with("cityName", this.cityName);
+        return BasicMapId.id("hotel_id", this.id).with("city_name", this.cityName);
     }
 
     public UUID getId() {

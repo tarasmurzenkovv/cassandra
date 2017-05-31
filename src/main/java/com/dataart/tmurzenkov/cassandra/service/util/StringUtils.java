@@ -1,7 +1,9 @@
 package com.dataart.tmurzenkov.cassandra.service.util;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Why the heck this class was not added in JDK???
@@ -27,6 +29,6 @@ public interface StringUtils {
      * @return {@link String}
      */
     static <T> String makeString(List<T> list) {
-        return list.stream().map(Object::toString).collect(Collectors.joining(", "));
+        return list.stream().filter(Objects::nonNull).map(Object::toString).collect(joining(", "));
     }
 }

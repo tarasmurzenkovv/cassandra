@@ -24,12 +24,12 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 public class RoomByHotelAndDate extends BasicEntity {
     @PrimaryKeyColumn(name = "hotel_id", type = PARTITIONED)
     private UUID id;
+    @PrimaryKeyColumn(name = "room_number", type = PARTITIONED)
+    private Integer roomNumber;
     @PrimaryKeyColumn(name = "booking_date", type = CLUSTERED)
     private LocalDate bookingDate;
-    @PrimaryKeyColumn(name = "status", type = CLUSTERED)
+    @Column
     private BookingStatus status;
-    @Column(value = "room_number")
-    private Integer roomNumber;
 
     /**
      * Default constructor.
@@ -85,7 +85,7 @@ public class RoomByHotelAndDate extends BasicEntity {
 
     @Override
     public MapId getCompositeId() {
-        return BasicMapId.id("id", this.id).with("bookingDate", this.bookingDate);
+        return BasicMapId.id("id", this.id).with("roomNumber", this.roomNumber);
     }
 
     @Override

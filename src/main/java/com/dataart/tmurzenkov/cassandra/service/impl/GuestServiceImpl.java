@@ -69,21 +69,6 @@ public class GuestServiceImpl implements GuestService {
         return savedGuestInfo;
     }
 
-    private void validateGuest(Guest guest) {
-        if (null == guest) {
-            throw new IllegalArgumentException("Cannot register the empty guest info. ");
-        }
-        if (null == guest.getId()) {
-            throw new IllegalArgumentException("Cannot register guest info with empty id. ");
-        }
-        if (isEmpty(guest.getFirstName())) {
-            throw new IllegalArgumentException("Cannot register guest info with empty first name. ");
-        }
-        if (isEmpty(guest.getLastName())) {
-            throw new IllegalArgumentException("Cannot register guest info with empty last name. ");
-        }
-    }
-
     @Override
     public List<Room> findBookedRoomsForTheGuestIdAndDate(UUID guestId, LocalDate bookingDate) {
         validateSearchParameters(guestId, bookingDate);
@@ -112,6 +97,21 @@ public class GuestServiceImpl implements GuestService {
         return bookingRequest;
     }
 
+    private void validateGuest(Guest guest) {
+        if (null == guest) {
+            throw new IllegalArgumentException("Cannot register the empty guest info. ");
+        }
+        if (null == guest.getId()) {
+            throw new IllegalArgumentException("Cannot register guest info with empty id. ");
+        }
+        if (isEmpty(guest.getFirstName())) {
+            throw new IllegalArgumentException("Cannot register guest info with empty first name. ");
+        }
+        if (isEmpty(guest.getLastName())) {
+            throw new IllegalArgumentException("Cannot register guest info with empty last name. ");
+        }
+    }
+
     private void validateBookingRequest(BookingRequest bookingRequest) {
         if (null == bookingRequest) {
             throw new IllegalArgumentException("Cannot perform booking for empty booking request. ");
@@ -138,12 +138,12 @@ public class GuestServiceImpl implements GuestService {
     }
 
     private void checkIfBooked(RoomByHotelAndDate roomByHotelAndDate) {
-        final String exceptionMessage = format("The following room is already booked. Room number: '%s', hotel id: '%s',",
+        final String exceptionMessage = format("The following room is already booked. Room number: '%s', hotel id: '%s'",
                 roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        validator()
-                .withCondition(e -> roomByHotelAndDateDao.exists(e.getCompositeId()))
-                .onConditionFailureThrow(() -> new RecordExistsException(exceptionMessage))
-                .doValidate(roomByHotelAndDate);
+        final RoomByHotelAndDate exists = roomByHotelAndDateDao.findOne(roomByHotelAndDate.getCompositeId());
+        if (exists != null && BOOKED == exists.getStatus()) {
+            throw new RecordExistsException(exceptionMessage);
+        }
     }
 
     private void checkIfRegistered(Guest guest) {

@@ -13,9 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -47,7 +48,7 @@ public final class TestUtils {
          * @param httpStatus  {@link HttpStatus}
          * @return {@link ResponseEntity}
          */
-        public static ResponseEntity build(RuntimeException e, String description, HttpStatus httpStatus) {
+        public static ResponseEntity<ErrorDto> build(RuntimeException e, String description, HttpStatus httpStatus) {
             return new ResponseEntity<>(new ErrorDto(e, description), httpStatus);
         }
 
@@ -59,7 +60,7 @@ public final class TestUtils {
          * @param httpStatus  {@link HttpStatus}
          * @return {@link ResponseEntity}
          */
-        public static ResponseEntity build(MethodArgumentNotValidException e, String description, HttpStatus httpStatus) {
+        public static ResponseEntity<ErrorDto> build(MethodArgumentNotValidException e, String description, HttpStatus httpStatus) {
             return new ResponseEntity<>(new ErrorDto(e, description), httpStatus);
         }
     }
@@ -87,6 +88,19 @@ public final class TestUtils {
      */
     public static <T> String asJson(List<T> entities) throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(entities);
+    }
+
+    /**
+     * Makes list from iterable.
+     *
+     * @param iterable {@link Iterable}
+     * @param <T>      type of list
+     * @return {@link List}
+     */
+    public static <T> List<T> makeList(Iterable<T> iterable) {
+        List<T> objects = new ArrayList<>();
+        iterable.iterator().forEachRemaining(objects::add);
+        return objects;
     }
 
     /**
@@ -119,6 +133,21 @@ public final class TestUtils {
         public static Hotel buildEmptyHotel() {
             final Hotel hotel = new Hotel();
             hotel.setId(null);
+            hotel.setAddress(null);
+            hotel.setName(null);
+            hotel.setPhone(null);
+            return hotel;
+        }
+
+        /**
+         * Factory method to create empty hotel.
+         *
+         * @param hotelId {@link UUID}
+         * @return {@link Hotel}
+         */
+        public static Hotel buildEmptyHotel(UUID hotelId) {
+            final Hotel hotel = new Hotel();
+            hotel.setId(hotelId);
             hotel.setAddress(null);
             hotel.setName(null);
             hotel.setPhone(null);
@@ -198,12 +227,46 @@ public final class TestUtils {
         }
 
         /**
+         * Factory method to create search request.
+         *
+         * @param hotelId   {@link UUID}
+         * @param daysToAdd {@link Integer}
+         * @return {@link SearchRequest}
+         */
+        public static SearchRequest buildSearchRequest(Integer daysToAdd, UUID hotelId) {
+            return new SearchRequest(now(), now().plusDays(daysToAdd), hotelId);
+        }
+
+        /**
          * Factory method to create booking request.
          *
          * @return {@link BookingRequest}
          */
         public static BookingRequest buildBookingRequest() {
             return new BookingRequest(randomUUID(), randomUUID(), 2, now().plusDays(4));
+        }
+
+        /**
+         * Factory method to create booking request.
+         *
+         * @param guestId {@link UUID}
+         * @param hotelId {@link UUID}
+         * @return {@link BookingRequest}
+         */
+        public static BookingRequest buildBookingRequest(UUID hotelId, UUID guestId) {
+            return new BookingRequest(guestId, hotelId, 2, now().plusDays(4));
+        }
+
+        /**
+         * Factory method to create booking request.
+         *
+         * @param guestId    {@link UUID}
+         * @param hotelId    {@link UUID}
+         * @param roomNumber {@link Integer}
+         * @return {@link BookingRequest}
+         */
+        public static BookingRequest buildBookingRequest(UUID hotelId, UUID guestId, Integer roomNumber) {
+            return new BookingRequest(guestId, hotelId, roomNumber, now().plusDays(4));
         }
     }
 
@@ -216,7 +279,7 @@ public final class TestUtils {
         /**
          * Factory method to create room.
          *
-         * @return {@link com.dataart.tmurzenkov.cassandra.model.entity.room.Room}
+         * @return {@link Room}
          */
         public static Room buildRoom() {
             int randomRoomNumber = ThreadLocalRandom.current().nextInt(0, 11);
@@ -224,13 +287,46 @@ public final class TestUtils {
         }
 
         /**
+         * Factory method to create room from hotel id.
+         *
+         * @param hotelId {@link UUID}
+         * @return {@link Room}
+         */
+        public static Room buildRoom(UUID hotelId) {
+            int randomRoomNumber = ThreadLocalRandom.current().nextInt(0, 11);
+            return new Room(hotelId, randomRoomNumber);
+        }
+
+        /**
+         * Factory method to create room from hotel id.
+         *
+         * @param hotelId    {@link UUID}
+         * @param roomNumber {@link Integer}
+         * @return {@link Room}
+         */
+        public static Room buildRoom(UUID hotelId, Integer roomNumber) {
+            return new Room(hotelId, roomNumber);
+        }
+
+        /**
          * Factory method to create list of rooms.
          *
          * @param numberToBuild {@link Integer}
-         * @return list of {@link com.dataart.tmurzenkov.cassandra.model.entity.room.Room}
+         * @return list of {@link Room}
          */
         public static List<Room> buildRooms(Integer numberToBuild) {
             return IntStream.of(0, numberToBuild).mapToObj(ids -> buildRoom()).collect(toList());
+        }
+
+        /**
+         * Factory method to create list of rooms from hotel id.
+         *
+         * @param numberToBuild {@link Integer}
+         * @param hotelId       {@link UUID}
+         * @return list of {@link Room}
+         */
+        public static List<Room> buildRooms(Integer numberToBuild, UUID hotelId) {
+            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids)).collect(toList());
         }
     }
 }

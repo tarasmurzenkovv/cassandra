@@ -7,7 +7,7 @@ import org.springframework.data.cassandra.repository.Query;
 import java.util.List;
 
 /**
- * Fetches hotel ids by the city name.
+ * {@link HotelByCity} dao. Implemented by spring during the context initialization.
  *
  * @author tmurzenkov
  */
@@ -18,6 +18,6 @@ public interface HotelByCityDao extends CassandraRepository<HotelByCity> {
      * @param cityName {@link String}
      * @return {@link List} of {@link HotelByCityDao}
      */
-    @Query("select id from hotels_by_city where city = ?0")
+    @Query("select * from hotels_by_city where city_name = ?0")
     List<HotelByCity> findAllHotelIdsInTheCity(String cityName);
 }

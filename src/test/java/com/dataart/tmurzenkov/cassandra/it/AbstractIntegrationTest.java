@@ -1,6 +1,5 @@
 package com.dataart.tmurzenkov.cassandra.it;
 
-import com.dataart.tmurzenkov.cassandra.configuration.WebContextConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -20,7 +19,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * @author tmurzenkov
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {WebContextConfiguration.class})
+@ContextConfiguration(classes = {TestConfiguration.class})
 @WebAppConfiguration
 @EnableWebMvc
 public abstract class AbstractIntegrationTest {

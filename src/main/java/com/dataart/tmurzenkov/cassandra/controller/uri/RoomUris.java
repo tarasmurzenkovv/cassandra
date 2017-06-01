@@ -1,7 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.controller.uri;
 
 /**
- * AvailableRoomByHotelAndDate controller REST api URIs.
+ * {@link com.dataart.tmurzenkov.cassandra.controller.RoomController} controller REST api URIs.
  *
  * @author tmurzenkov
  */

@@ -4,11 +4,22 @@ use hotel;
 
 create type address(
 	street text,
-	cityName text,
+	city text,
 	state_or_province text,
 	post_code text,
 	country text
 );
+
+create table if not exists guest(
+  guest_id uuid,
+  first_name text,
+  last_name text,
+  emails set<text>,
+  phone_numbers set<text>,
+  title text,
+  primary key ((guest_id))
+) with comment = 'Stores guest information. ';
+
 
 create table if not exists hotels(
   hotel_id uuid,
@@ -30,4 +41,4 @@ create table if not exists available_rooms_by_hotel_date(
   room_number int,
   is_available boolean,
   primary key ((hotel_id), date, room_number)
-) with comment = 'Finds available availableRoomByHotelAndDates by hotel/date. ';
+) with comment = 'Finds available roomByHotelAndDates by hotel/date. ';

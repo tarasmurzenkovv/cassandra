@@ -3,7 +3,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 import com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -108,7 +108,7 @@ public class GuestController {
      *
      * @param guestId       {@link UUID}
      * @param dateToLookFor {@link Date}
-     * @return {@link List} of {@link AvailableRoomByHotelAndDate}
+     * @return {@link List} of {@link RoomByHotelAndDate}
      */
     @ApiOperation(value = "Gets booked rooms for the guest id and specific date. ",
             notes = "Gets booked rooms for the guest id and specific date. ")
@@ -118,7 +118,7 @@ public class GuestController {
             @ApiResponse(code = NOT_FOUND, message = "No booked rooms were found. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     @ResponseStatus(FOUND)
-    public List<AvailableRoomByHotelAndDate> bookedRoomsByGuest(
+    public List<RoomByHotelAndDate> bookedRoomsByGuest(
             @ApiParam(required = true, value = "The UUID representation of the guest id. ")
             @PathVariable("guestId") @Valid UUID guestId,
             @PathVariable("date")

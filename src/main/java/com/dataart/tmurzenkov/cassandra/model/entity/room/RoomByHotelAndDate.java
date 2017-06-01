@@ -2,7 +2,13 @@ package com.dataart.tmurzenkov.cassandra.model.entity.room;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
-import com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
@@ -13,66 +19,84 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
-import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
 /**
- * Maps to the table room_booked_by_hotel_and_date.
+ * RoomByHotelAndDate cassandra entity.
  *
  * @author tmurzenkov
  */
-@Table("room_by_hotel_and_date_and_status")
+
+@Table("available_rooms_by_hotel_date")
 public class RoomByHotelAndDate extends BasicEntity {
-    @PrimaryKeyColumn(name = "hotel_id", type = PARTITIONED)
+    @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
     private UUID id;
-    @PrimaryKeyColumn(name = "room_number", type = PARTITIONED)
+    @PrimaryKeyColumn(name = "date", type = CLUSTERED)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate date;
+    @PrimaryKeyColumn(name = "room_number", type = CLUSTERED)
     private Integer roomNumber;
-    @PrimaryKeyColumn(name = "booking_date", type = CLUSTERED)
-    private LocalDate bookingDate;
-    @Column
-    private BookingStatus status;
+    @Column("is_available")
+    private Boolean isAvailable;
 
     /**
-     * Default constructor.
+     * Constructor.
      */
     public RoomByHotelAndDate() {
     }
 
+
     /**
-     * Constructs from {@link BookingRequest} and {@link BookingStatus}.
+     * Constructs from the provided hotel id and room number and booking date.
      *
-     * @param bookingRequest {@link BookingRequest}
-     * @param bookingStatus  {@link BookingStatus}
+     * @param id         {@link UUID}
+     * @param roomNumber {@link Integer}
+     * @param localDate  {@link LocalDate}
      */
-    public RoomByHotelAndDate(BookingRequest bookingRequest, BookingStatus bookingStatus) {
-        this.id = bookingRequest.getHotelId();
-        this.bookingDate = bookingRequest.getBookingDate();
-        this.status = bookingStatus;
-        this.roomNumber = bookingRequest.getRoomNumber();
+    public RoomByHotelAndDate(UUID id, Integer roomNumber, LocalDate localDate) {
+        this.id = id;
+        this.roomNumber = roomNumber;
+        this.date = localDate;
+        this.setAvailable(true);
     }
 
+    /**
+     * Builds from {@link BookingRequest}.
+     *
+     * @param bookingRequest {@link BookingRequest}
+     */
+    public RoomByHotelAndDate(BookingRequest bookingRequest) {
+        this.id = bookingRequest.getHotelId();
+        this.roomNumber = bookingRequest.getRoomNumber();
+        this.date = bookingRequest.getBookingDate();
+        this.setAvailable(false);
+    }
+
+    /**
+     * Constructs from {@link RoomByGuestAndDate}.
+     *
+     * @param roomByGuestAndDate {@link RoomByGuestAndDate}
+     */
+    public RoomByHotelAndDate(RoomByGuestAndDate roomByGuestAndDate) {
+        this(roomByGuestAndDate.getHotelId(), roomByGuestAndDate.getRoomNumber(), roomByGuestAndDate.getBookingDate());
+    }
+
+
     @Override
+    @JsonIgnore
+    public MapId getCompositeId() {
+        return BasicMapId.id("id", this.id)
+                .with("date", this.date)
+                .with("roomNumber", this.roomNumber);
+    }
+
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public LocalDate getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public BookingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(BookingStatus status) {
-        this.status = status;
     }
 
     public Integer getRoomNumber() {
@@ -83,19 +107,20 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.roomNumber = roomNumber;
     }
 
-    @Override
-    public MapId getCompositeId() {
-        return BasicMapId.id("id", this.id).with("roomNumber", this.roomNumber);
+    public LocalDate getDate() {
+        return date;
     }
 
-    @Override
-    public String toString() {
-        return "RoomByHotelAndDate{"
-                + "id=" + id
-                + ", bookingDate=" + bookingDate
-                + ", status=" + status
-                + ", roomNumber=" + roomNumber
-                + '}';
+    public void setDate(final LocalDate date) {
+        this.date = date;
+    }
+
+    public Boolean getAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(final Boolean available) {
+        isAvailable = available;
     }
 
     @Override
@@ -107,26 +132,27 @@ public class RoomByHotelAndDate extends BasicEntity {
             return false;
         }
 
-        RoomByHotelAndDate that = (RoomByHotelAndDate) o;
+        RoomByHotelAndDate roomByHotelAndDate = (RoomByHotelAndDate) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) {
+        if (id != null ? !id.equals(roomByHotelAndDate.id) : roomByHotelAndDate.id != null) {
             return false;
         }
-        if (bookingDate != null ? !bookingDate.equals(that.bookingDate) : that.bookingDate != null) {
-            return false;
-        }
-        if (status != that.status) {
-            return false;
-        }
-        return roomNumber != null ? roomNumber.equals(that.roomNumber) : that.roomNumber == null;
+        return roomNumber != null
+                ? roomNumber.equals(roomByHotelAndDate.roomNumber) : roomByHotelAndDate.roomNumber == null;
     }
 
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (bookingDate != null ? bookingDate.hashCode() : 0);
-        result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "RoomByHotelAndDate{"
+                + "hotel_id=" + id
+                + ", roomNumber=" + roomNumber
+                + '}';
     }
 }

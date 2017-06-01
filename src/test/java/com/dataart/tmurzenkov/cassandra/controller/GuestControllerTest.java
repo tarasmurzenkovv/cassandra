@@ -2,7 +2,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.GuestServiceImpl;
@@ -207,11 +207,11 @@ public class GuestControllerTest {
     public void shouldLookForBookedRoomsForCustomerIdAndBookingDate() throws Exception {
         final UUID guestId = UUID.randomUUID();
         final LocalDate bookingDate = now();
-        List<AvailableRoomByHotelAndDate> availableRoomByHotelAndDates = buildRooms(10);
-        when(guestService.findBookedRoomsForTheGuestIdAndDate(eq(guestId), eq(bookingDate))).thenReturn(availableRoomByHotelAndDates);
+        List<RoomByHotelAndDate> roomByHotelAndDates = buildRooms(10);
+        when(guestService.findBookedRoomsForTheGuestIdAndDate(eq(guestId), eq(bookingDate))).thenReturn(roomByHotelAndDates);
         mockMvc
                 .perform(get(ROOMS_BY_GUEST_AND_DATE, guestId, format(bookingDate)))
                 .andExpect(status().isFound())
-                .andExpect(content().string(asJson(availableRoomByHotelAndDates)));
+                .andExpect(content().string(asJson(roomByHotelAndDates)));
     }
 }

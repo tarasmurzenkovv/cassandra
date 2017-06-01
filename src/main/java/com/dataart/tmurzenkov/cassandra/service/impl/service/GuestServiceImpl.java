@@ -57,12 +57,11 @@ public class GuestServiceImpl implements GuestService {
         validateSearchParameters(guestId, bookingDate);
         LOGGER.debug("Going to look for the booked rooms for the guest id '{}' and '{}'", guestId, bookingDate);
         final List<RoomByHotelAndDate> bookedRoomByHotelAndDates = roomByGuestAndDateDao
-                .getAllBookedRooms(guestId, bookingDate).stream().map(RoomByHotelAndDate::new).collect(toList());
-        if (bookedRoomByHotelAndDates.isEmpty()) {
-            final String message = format("Cannot find the booked rooms for the customer id '%s' and given date '%s'",
-                    guestId, format(bookingDate));
-            throw new RecordNotFoundException(message);
-        }
+                .getAllBookedRooms(guestId, bookingDate)
+                .stream()
+                .map(RoomByHotelAndDate::new)
+                .collect(toList());
+        validateFoundRoomsByHotelAndDate(guestId, bookingDate, bookedRoomByHotelAndDates);
         LOGGER.debug("Guest with id '{}' has the following booked rooms '{}'", guestId, makeString(bookedRoomByHotelAndDates));
         return bookedRoomByHotelAndDates;
     }
@@ -70,14 +69,30 @@ public class GuestServiceImpl implements GuestService {
     @Override
     public BookingRequest performBooking(BookingRequest bookingRequest) {
         validateBookingRequest(bookingRequest);
+        doInsertInGuestAndDate(bookingRequest);
+        doInsertInRoomByHotelAndDate(bookingRequest);
+        return bookingRequest;
+    }
+
+    private void validateFoundRoomsByHotelAndDate(final UUID guestId, final LocalDate bookingDate, final List<RoomByHotelAndDate> bookedRoomByHotelAndDates) {
+        if (bookedRoomByHotelAndDates.isEmpty()) {
+            final String message = format("Cannot find the booked rooms for the customer id '%s' and given date '%s'",
+                    guestId, format(bookingDate));
+            throw new RecordNotFoundException(message);
+        }
+    }
+
+    private void doInsertInGuestAndDate(final BookingRequest bookingRequest) {
         final RoomByGuestAndDate guestAndDate = new RoomByGuestAndDate(bookingRequest);
-        final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
-        checkIfExists(roomByHotelAndDate);
         checkIfBooked(guestAndDate);
         guestAndDate.setConfirmationNumber(valueOf(generateConfirmationNumber(bookingRequest)));
-        roomByHotelAndDateDao.insert(roomByHotelAndDate);
         roomByGuestAndDateDao.insert(guestAndDate);
-        return bookingRequest;
+    }
+
+    private void doInsertInRoomByHotelAndDate(final BookingRequest bookingRequest) {
+        final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
+        checkIfExists(roomByHotelAndDate);
+        roomByHotelAndDateDao.insert(roomByHotelAndDate);
     }
 
     private void validateBookingRequest(BookingRequest bookingRequest) {

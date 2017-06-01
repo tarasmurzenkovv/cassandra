@@ -4,7 +4,6 @@ import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,14 +13,6 @@ import java.util.UUID;
  * @author tmurzenkov
  */
 public interface HotelDao extends CassandraRepository<Hotel> {
-    /**
-     * Find all {@link Hotel} by the provided list of {@link UUID} their ids.
-     *
-     * @param uuid hotel id
-     * @return {@link List} of {@link Hotel}
-     */
-    @Query("select * from hotels where hotel_id in (?0)")
-    List<Hotel> findAllHotelsByTheirIds(List<UUID> uuid);
 
     /**
      * Finds one hotel by its id.

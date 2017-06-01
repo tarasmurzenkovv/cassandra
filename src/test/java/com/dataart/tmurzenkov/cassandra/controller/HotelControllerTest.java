@@ -4,6 +4,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
+import com.dataart.tmurzenkov.cassandra.service.impl.validation.HotelValidatorServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,8 @@ public class HotelControllerTest {
     @Mock
     private HotelServiceImpl hotelService;
     @Mock
+    private HotelValidatorServiceImpl validatorService;
+    @Mock
     private ServiceResourceAssembler<Hotel, Resource<Hotel>> resourceAssembler;
     @InjectMocks
     private HotelController sut;
@@ -90,7 +93,7 @@ public class HotelControllerTest {
         final Hotel hotel = buildEmptyHotel();
         final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty id. ");
 
-        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
+        when(hotelService.addHotel(eq(hotel))).thenThrow(exception);
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -103,7 +106,7 @@ public class HotelControllerTest {
         hotel.setName("");
         final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty name. ");
 
-        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
+        when(hotelService.addHotel(eq(hotel))).thenThrow(exception);
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -116,7 +119,7 @@ public class HotelControllerTest {
         hotel.setPhone("");
         final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty phone field. ");
 
-        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
+        when(hotelService.addHotel(eq(hotel))).thenThrow(exception);
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -129,7 +132,7 @@ public class HotelControllerTest {
         hotel.setAddress(null);
         final RuntimeException exception = new IllegalArgumentException("Cannot add the hotel with empty address info. ");
 
-        when(hotelService.addHotel(eq(hotel))).thenCallRealMethod();
+        when(hotelService.addHotel(eq(hotel))).thenThrow(exception);
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(hotel)).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())

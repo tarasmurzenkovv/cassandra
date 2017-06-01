@@ -10,6 +10,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.validation.GuestValidatorServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,9 +36,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 
 /**
  * UTs for the {@link GuestServiceImpl}.
@@ -48,6 +52,8 @@ import static org.mockito.Mockito.when;
 public class GuestServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private GuestValidatorServiceImpl validatorService;
     @Mock
     private GuestDao guestDao;
     @Mock
@@ -180,13 +186,15 @@ public class GuestServiceTest {
         expectedGuest.setFirstName("Test name");
         expectedGuest.setLastName("Test last name");
 
-        when(guestDao.exists(eq(expectedGuest.getCompositeId()))).thenReturn(false);
         when(guestDao.insert(eq(expectedGuest))).thenReturn(expectedGuest);
+        doNothing().when(validatorService).checkIfExists(eq(expectedGuest));
+        doCallRealMethod().when(validatorService).validateInfo(eq(expectedGuest));
 
         Guest actualGuest = sut.registerNewGuest(expectedGuest);
 
-        verify(guestDao).exists(eq(expectedGuest.getCompositeId()));
         verify(guestDao).insert(eq(expectedGuest));
+        verify(validatorService).validateInfo(eq(expectedGuest));
+        verify(validatorService).checkIfExists(eq(expectedGuest));
         assertEquals(actualGuest, expectedGuest);
     }
 
@@ -201,10 +209,11 @@ public class GuestServiceTest {
                 + "Guest id: '%s', name: '%s', surname: '%s'", guestId, expectedGuest.getFirstName(), expectedGuest.getLastName());
         thrown.expect(RecordExistsException.class);
         thrown.expectMessage(exceptionMessage);
-        when(guestDao.exists(expectedGuest.getCompositeId())).thenReturn(true);
+        doThrow(new RecordExistsException(exceptionMessage)).when(validatorService).checkIfExists(eq(expectedGuest));
 
         sut.registerNewGuest(expectedGuest);
 
+        verify(validatorService).checkIfExists(eq(expectedGuest));
         verify(guestDao).exists(eq(expectedGuest.getCompositeId()));
         verify(guestDao, never()).insert(any());
     }

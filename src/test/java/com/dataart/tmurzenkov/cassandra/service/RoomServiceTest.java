@@ -3,11 +3,11 @@ package com.dataart.tmurzenkov.cassandra.service;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
-import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.RoomServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.validation.RoomValidatorServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,9 +28,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+
 
 /**
  * UTs for the {@link RoomServiceTest}.
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.when;
 public class RoomServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private RoomValidatorServiceImpl validatorService;
     @Mock
     private RoomByHotelAndDateDao roomByHotelAndDateDao;
     @Mock
@@ -53,10 +57,8 @@ public class RoomServiceTest {
         final UUID hotelId = UUID.randomUUID();
         final Integer roomNumber = 4;
         final RoomByHotelAndDate expectedRoomByHotelAndDate = new RoomByHotelAndDate(hotelId, roomNumber, LocalDate.now());
-        final Hotel hotel = new Hotel();
 
         when(roomByHotelAndDateDao.insert(eq(expectedRoomByHotelAndDate))).thenReturn(expectedRoomByHotelAndDate);
-        when(hotelDao.findOne(eq(hotelId))).thenReturn(hotel);
         final RoomByHotelAndDate actualRoomByHotelAndDate = sut.addRoomToHotel(expectedRoomByHotelAndDate);
 
         verify(roomByHotelAndDateDao).insert(eq(expectedRoomByHotelAndDate));
@@ -68,12 +70,11 @@ public class RoomServiceTest {
         final UUID hotelId = UUID.randomUUID();
         final Integer roomNumber = 4;
         final RoomByHotelAndDate expectedRoomByHotelAndDate = new RoomByHotelAndDate(hotelId, roomNumber, LocalDate.now());
-        final Hotel hotel = null;
         final String exceptionMessage = format("Cannot find the hotel for the given hotel id '%s'", expectedRoomByHotelAndDate.getId());
 
-        when(hotelDao.findOne(eq(hotelId))).thenReturn(hotel);
         thrown.expectMessage(exceptionMessage);
         thrown.expect(RecordNotFoundException.class);
+        doThrow(new RecordNotFoundException(exceptionMessage)).when(validatorService).validateInfo(eq(expectedRoomByHotelAndDate));
         final RoomByHotelAndDate actualRoomByHotelAndDate = sut.addRoomToHotel(expectedRoomByHotelAndDate);
 
         verify(roomByHotelAndDateDao, never()).insert(any());
@@ -87,8 +88,8 @@ public class RoomServiceTest {
         final RoomByHotelAndDate expectedRoomByHotelAndDate = new RoomByHotelAndDate(hotelId, roomNumber, LocalDate.now());
         final String exceptionMessage = format("The room is already inserted in DB. Room info '%s'", expectedRoomByHotelAndDate);
 
-        when(roomByHotelAndDateDao.exists(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(true);
-        when(hotelDao.findOne(eq(hotelId))).thenReturn(new Hotel());
+        doThrow(new RecordExistsException(exceptionMessage)).when(validatorService).checkIfExists(eq(expectedRoomByHotelAndDate));
+
         thrown.expectMessage(exceptionMessage);
         thrown.expect(RecordExistsException.class);
         final RoomByHotelAndDate actualRoomByHotelAndDate = sut.addRoomToHotel(expectedRoomByHotelAndDate);
@@ -103,7 +104,9 @@ public class RoomServiceTest {
 
         thrown.expectMessage(exceptionMessage);
         thrown.expect(IllegalArgumentException.class);
-        sut.addRoomToHotel(null);
+        final RoomByHotelAndDate expectedRoomByHotelAndDate = null;
+        doThrow(new IllegalArgumentException(exceptionMessage)).when(validatorService).validateInfo(eq(expectedRoomByHotelAndDate));
+        sut.addRoomToHotel(expectedRoomByHotelAndDate);
 
         verify(roomByHotelAndDateDao, never()).insert(any());
         verify(hotelDao, never()).findOne(any(UUID.class));
@@ -119,6 +122,7 @@ public class RoomServiceTest {
 
         thrown.expectMessage(exceptionMessage);
         thrown.expect(IllegalArgumentException.class);
+        doThrow(new IllegalArgumentException(exceptionMessage)).when(validatorService).validateInfo(eq(expectedRoomByHotelAndDate));
         sut.addRoomToHotel(expectedRoomByHotelAndDate);
 
         verify(roomByHotelAndDateDao, never()).insert(any());
@@ -133,7 +137,7 @@ public class RoomServiceTest {
 
         thrown.expectMessage(exceptionMessage);
         thrown.expect(IllegalArgumentException.class);
-        when(hotelDao.findOne(eq(hotelId))).thenReturn(new Hotel());
+        doThrow(new IllegalArgumentException(exceptionMessage)).when(validatorService).validateInfo(eq(expectedRoomByHotelAndDate));
         sut.addRoomToHotel(expectedRoomByHotelAndDate);
 
         verify(roomByHotelAndDateDao, never()).insert(any());

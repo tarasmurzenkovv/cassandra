@@ -11,7 +11,6 @@ import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
-import com.dataart.tmurzenkov.cassandra.service.impl.validation.GuestValidatorServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -8,6 +8,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.validation.HotelValidatorServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -34,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 
 /**
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.never;
 public class HotelServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private HotelValidatorServiceImpl validatorService;
     @Mock
     private HotelDao hotelDao;
     @Mock
@@ -63,7 +67,6 @@ public class HotelServiceTest {
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
         final HotelByCity expectedHotelByCity = new HotelByCity(expectedHotelToAdd);
 
-        when(hotelDao.exists(expectedHotelToAdd.getCompositeId())).thenReturn(false);
         when(hotelDao.insert(eq(expectedHotelToAdd))).thenReturn(expectedHotelToAdd);
         when(hotelByCityDao.insert(eq(expectedHotelByCity))).thenReturn(expectedHotelByCity);
 
@@ -71,7 +74,7 @@ public class HotelServiceTest {
 
         verify(hotelDao).insert(hotelArgumentCaptor.capture());
         verify(hotelByCityDao).insert(hotelByCityArgumentCaptor.capture());
-        verify(hotelDao).exists(eq(expectedHotelToAdd.getCompositeId()));
+        verify(validatorService).checkIfExists(eq(expectedHotelToAdd));
 
         final HotelByCity actualHotelByCity = hotelByCityArgumentCaptor.getValue();
         assertEquals(expectedHotelByCity, actualHotelByCity);
@@ -86,7 +89,7 @@ public class HotelServiceTest {
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
         final String message = format("Such hotel information is already added to the data base '%s'", expectedHotelToAdd);
 
-        when(hotelDao.exists(expectedHotelToAdd.getCompositeId())).thenReturn(true);
+        doThrow(new RecordExistsException(message)).when(validatorService).checkIfExists(eq(expectedHotelToAdd));
         thrown.expectMessage(message);
         thrown.expect(RecordExistsException.class);
 

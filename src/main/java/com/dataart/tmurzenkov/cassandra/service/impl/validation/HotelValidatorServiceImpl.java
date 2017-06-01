@@ -11,11 +11,17 @@ import org.springframework.stereotype.Service;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
 import static java.lang.String.format;
 
+/**
+ * Implementation of the {@link ValidatorService} for the {@link Hotel}.
+ *
+ * @author tmurzenkov
+ */
 @Service
 public class HotelValidatorServiceImpl implements ValidatorService<Hotel> {
     @Autowired
     private HotelDao hotelDao;
 
+    @Override
     public void validateInfo(Hotel hotel) {
         if (null == hotel) {
             throw new IllegalArgumentException("Cannot add the empty hotel info. ");
@@ -32,6 +38,7 @@ public class HotelValidatorServiceImpl implements ValidatorService<Hotel> {
         validateHotelAddress(hotel.getAddress());
     }
 
+    @Override
     public void checkIfExists(Hotel hotel) {
         final String message = format("Such hotel information is already added to the data base '%s'", hotel);
         if (hotelDao.exists(hotel.getCompositeId())) {

@@ -29,6 +29,6 @@ public interface StringUtils {
      * @return {@link String}
      */
     static <T> String makeString(List<T> list) {
-        return list.stream().filter(Objects::nonNull).map(Object::toString).collect(joining(", "));
+        return (null == list || list.isEmpty()) ? "" : list.stream().filter(Objects::nonNull).map(Object::toString).collect(joining(", "));
     }
 }

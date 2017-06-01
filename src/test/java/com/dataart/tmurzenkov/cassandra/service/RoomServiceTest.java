@@ -7,7 +7,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
-import com.dataart.tmurzenkov.cassandra.service.impl.RoomServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.RoomServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

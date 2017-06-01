@@ -5,7 +5,7 @@ import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
-import com.dataart.tmurzenkov.cassandra.service.impl.RoomServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.RoomServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;

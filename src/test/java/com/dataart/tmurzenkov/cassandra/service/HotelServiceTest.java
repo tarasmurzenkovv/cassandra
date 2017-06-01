@@ -7,7 +7,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
-import com.dataart.tmurzenkov.cassandra.service.impl.HotelServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,7 +35,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 
 /**
  * UTs for the {@link HotelServiceImpl}.
@@ -101,15 +100,16 @@ public class HotelServiceTest {
     public void shouldFindAllHotelsInTheCity() {
         final String cityName = "London";
         final List<Hotel> expectedHotels = buildHotelList(cityName);
+        final List<UUID> hotelIds = expectedHotels.stream().map(Hotel::getId).collect(toList());
         final List<HotelByCity> hotelIdsByCity = buildHotelsByCity(expectedHotels);
 
         when(hotelByCityDao.findAllHotelIdsInTheCity(eq(cityName))).thenReturn(hotelIdsByCity);
-        expectedHotels.forEach(expectedHotel -> when(hotelDao.findOne(eq(expectedHotel.getId()))).thenReturn(expectedHotel));
+        when(hotelDao.findHotelInformationByIds(eq(hotelIds))).thenReturn(expectedHotels);
 
         List<Hotel> actualAllHotelsInTheCity = sut.findAllHotelsInTheCity(cityName);
 
         verify(hotelByCityDao).findAllHotelIdsInTheCity(eq(cityName));
-        verify(hotelDao, times(expectedHotels.size())).findOne(any(UUID.class));
+        verify(hotelDao).findHotelInformationByIds(eq(hotelIds));
         assertFalse(actualAllHotelsInTheCity.isEmpty());
         assertEquals(expectedHotels.size(), actualAllHotelsInTheCity.size());
         assertTrue(actualAllHotelsInTheCity.containsAll(expectedHotels));

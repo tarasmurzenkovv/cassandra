@@ -2,7 +2,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
-import com.dataart.tmurzenkov.cassandra.service.impl.HotelServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import org.junit.Before;
 import org.junit.Test;

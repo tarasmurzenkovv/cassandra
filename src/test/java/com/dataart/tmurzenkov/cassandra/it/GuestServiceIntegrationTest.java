@@ -13,7 +13,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
-import com.dataart.tmurzenkov.cassandra.service.impl.GuestServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

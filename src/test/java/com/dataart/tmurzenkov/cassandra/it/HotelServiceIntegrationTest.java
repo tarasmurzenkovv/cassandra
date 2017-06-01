@@ -7,7 +7,7 @@ import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
-import com.dataart.tmurzenkov.cassandra.service.impl.HotelServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

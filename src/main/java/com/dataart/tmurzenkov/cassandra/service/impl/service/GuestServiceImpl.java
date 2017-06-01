@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.service.impl;
+package com.dataart.tmurzenkov.cassandra.service.impl.service;
 
 import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByGuestAndDateDao;
@@ -10,17 +10,18 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
+import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
+import com.dataart.tmurzenkov.cassandra.service.impl.validation.GuestValidatorServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
 import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
-import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
@@ -34,29 +35,19 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class GuestServiceImpl implements GuestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestServiceImpl.class);
-    private final GuestDao guestDao;
-    private final RoomByHotelAndDateDao roomByHotelAndDateDao;
-    private final RoomByGuestAndDateDao roomByGuestAndDateDao;
-
-    /**
-     * The below services will be autowired by Spring automatically.
-     *
-     * @param guestDao                       {@link GuestDao}
-     * @param roomByGuestAndDateDao          {@link RoomByGuestAndDateDao}
-     * @param roomByHotelAndDateDao {@link RoomByHotelAndDateDao}
-     */
-    public GuestServiceImpl(GuestDao guestDao,
-                            RoomByHotelAndDateDao roomByHotelAndDateDao,
-                            RoomByGuestAndDateDao roomByGuestAndDateDao) {
-        this.guestDao = guestDao;
-        this.roomByGuestAndDateDao = roomByGuestAndDateDao;
-        this.roomByHotelAndDateDao = roomByHotelAndDateDao;
-    }
+    @Autowired
+    private GuestDao guestDao;
+    @Autowired
+    private RoomByHotelAndDateDao roomByHotelAndDateDao;
+    @Autowired
+    private RoomByGuestAndDateDao roomByGuestAndDateDao;
+    @Autowired
+    private ValidatorService<Guest> guestValidatorService;
 
     @Override
     public Guest registerNewGuest(Guest guest) {
-        validateGuest(guest);
-        checkIfRegistered(guest);
+        guestValidatorService.validateInfo(guest);
+        guestValidatorService.checkIfExists(guest);
         final Guest savedGuestInfo = guestDao.insert(guest);
         LOGGER.info("Successfully registered the new guest '{}'", savedGuestInfo);
         return savedGuestInfo;
@@ -88,21 +79,6 @@ public class GuestServiceImpl implements GuestService {
         roomByHotelAndDateDao.insert(roomByHotelAndDate);
         roomByGuestAndDateDao.insert(guestAndDate);
         return bookingRequest;
-    }
-
-    private void validateGuest(Guest guest) {
-        if (null == guest) {
-            throw new IllegalArgumentException("Cannot register the empty guest info. ");
-        }
-        if (null == guest.getId()) {
-            throw new IllegalArgumentException("Cannot register guest info with empty id. ");
-        }
-        if (isEmpty(guest.getFirstName())) {
-            throw new IllegalArgumentException("Cannot register guest info with empty first name. ");
-        }
-        if (isEmpty(guest.getLastName())) {
-            throw new IllegalArgumentException("Cannot register guest info with empty last name. ");
-        }
     }
 
     private void validateBookingRequest(BookingRequest bookingRequest) {
@@ -137,15 +113,6 @@ public class GuestServiceImpl implements GuestService {
         if (roomByGuestAndDateDao.exists(roomByGuestAndDate.getCompositeId())) {
             throw new RecordExistsException(exceptionMessage);
         }
-    }
-
-    private void checkIfRegistered(Guest guest) {
-        final String exceptionMessage = format("The guest information is already stored in DB. "
-                + "Guest id: '%s', name: '%s', surname: '%s'", guest.getId(), guest.getFirstName(), guest.getLastName());
-        validator()
-                .withCondition(e -> guestDao.exists(e.getCompositeId()))
-                .onConditionFailureThrow(() -> new RecordExistsException(exceptionMessage))
-                .doValidate(guest);
     }
 
     private Integer generateConfirmationNumber(BookingRequest bookingRequest) {

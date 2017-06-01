@@ -4,9 +4,11 @@ import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
+import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
-import com.dataart.tmurzenkov.cassandra.service.impl.GuestServiceImpl;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
+import com.dataart.tmurzenkov.cassandra.service.impl.validation.GuestValidatorServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +40,8 @@ import static java.lang.String.format;
 import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -54,6 +58,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  */
 @RunWith(MockitoJUnitRunner.class)
 public class GuestControllerTest {
+    @Mock
+    private GuestValidatorServiceImpl guestValidatorService;
     @Mock
     private GuestServiceImpl guestService;
     @Mock
@@ -113,7 +119,8 @@ public class GuestControllerTest {
         final String exceptionMessage = "Cannot register guest info with empty id. ";
         final RuntimeException exception = new IllegalArgumentException(exceptionMessage);
 
-        when(guestService.registerNewGuest(eq(guest))).thenCallRealMethod();
+        doCallRealMethod().when(guestValidatorService).validateInfo(eq(guest));
+        doCallRealMethod().when(guestValidatorService).checkIfExists(eq(guest));
 
         mockMvc
                 .perform(post(ADD_GUEST).content(asJson(guest)).contentType(APPLICATION_JSON))

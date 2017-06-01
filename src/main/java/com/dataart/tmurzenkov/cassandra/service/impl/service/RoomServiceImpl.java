@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus.FREE;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -35,7 +36,7 @@ public class RoomServiceImpl implements RoomService {
         LOGGER.info("Going to add the new room to the hotel '{}'", roomByHotelAndDate);
         validatorService.validateInfo(roomByHotelAndDate);
         validatorService.checkIfExists(roomByHotelAndDate);
-        roomByHotelAndDate.setAvailable(true);
+        roomByHotelAndDate.setBookingStatus(FREE);
         RoomByHotelAndDate addedRoomByHotelAndDate = roomByHotelAndDateDao.insert(roomByHotelAndDate);
         LOGGER.info("Successfully added the new room to the hotel '{}'", addedRoomByHotelAndDate);
         return addedRoomByHotelAndDate;
@@ -46,7 +47,7 @@ public class RoomServiceImpl implements RoomService {
         List<RoomByHotelAndDate> freeRoomsInHotel = roomByHotelAndDateDao
                 .findAvailableRoomsForHotelId(searchRequest.getHotelId(), searchRequest.getStart(), searchRequest.getEnd())
                 .stream()
-                .filter(RoomByHotelAndDate::getAvailable)
+                .filter(e -> FREE == e.getBookingStatus())
                 .collect(toList());
         if (freeRoomsInHotel.isEmpty()) {
             throw new RecordNotFoundException(format("No free rooms were found for the given request '%s'", searchRequest));

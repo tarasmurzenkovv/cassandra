@@ -2,6 +2,7 @@ package com.dataart.tmurzenkov.cassandra.model.entity.room;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
+import com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -38,7 +39,7 @@ public class RoomByHotelAndDate extends BasicEntity {
     @PrimaryKeyColumn(name = "room_number", type = CLUSTERED)
     private Integer roomNumber;
     @Column("is_available")
-    private Boolean isAvailable;
+    private BookingStatus bookingStatus;
 
     /**
      * Constructor.
@@ -58,7 +59,7 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.id = id;
         this.roomNumber = roomNumber;
         this.date = localDate;
-        this.setAvailable(true);
+        this.bookingStatus = BookingStatus.FREE;
     }
 
     /**
@@ -70,7 +71,7 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.id = bookingRequest.getHotelId();
         this.roomNumber = bookingRequest.getRoomNumber();
         this.date = bookingRequest.getBookingDate();
-        this.setAvailable(false);
+        this.bookingStatus = BookingStatus.BOOKED;
     }
 
     /**
@@ -115,12 +116,12 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.date = date;
     }
 
-    public Boolean getAvailable() {
-        return isAvailable;
+    public BookingStatus getBookingStatus() {
+        return bookingStatus;
     }
 
-    public void setAvailable(final Boolean available) {
-        isAvailable = available;
+    public void setBookingStatus(final BookingStatus bookingStatus) {
+        this.bookingStatus = bookingStatus;
     }
 
     @Override

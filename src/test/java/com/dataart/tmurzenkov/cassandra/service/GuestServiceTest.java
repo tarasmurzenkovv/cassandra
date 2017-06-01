@@ -102,7 +102,6 @@ public class GuestServiceTest {
     public void shouldThrowAlreadyBookedException() {
         final Integer roomNumber = 1;
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
-        final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
         final String exceptionMessage = format("The following room is already booked. Room number: '%d', hotel id: '%s'",
                 bookingRequest.getRoomNumber(), bookingRequest.getHotelId());
@@ -111,7 +110,6 @@ public class GuestServiceTest {
         thrown.expectMessage(exceptionMessage);
 
         when(byGuestAndDateDao.exists(eq(expectedRoomByGuestAndDate.getCompositeId()))).thenReturn(true);
-        when(roomByHotelAndDateDao.findOne(any(), any(), any())).thenReturn(roomByHotelAndDate);
 
         sut.performBooking(bookingRequest);
 

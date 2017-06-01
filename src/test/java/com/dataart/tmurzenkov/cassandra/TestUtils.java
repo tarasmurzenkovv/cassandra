@@ -4,6 +4,7 @@ import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.dto.ErrorDto;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
+import com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
@@ -283,6 +284,25 @@ public final class TestUtils {
             return new BookingRequest(guestId, hotelId, roomNumber, localDate);
         }
 
+        /**
+         * Factory method to create list of rooms.
+         *
+         * @param hotelId    {@link UUID}
+         * @param localDate  {@link LocalDate}
+         * @return {@link BookingRequest}
+         */
+        public static List<RoomByHotelAndDate> buildRoomsInHotelAndDate(UUID hotelId, LocalDate localDate) {
+            List<RoomByHotelAndDate> allRoomsInHotel = new ArrayList<>();
+
+            RoomByHotelAndDate first = new RoomByHotelAndDate(hotelId, 1, localDate);
+            RoomByHotelAndDate second = new RoomByHotelAndDate(hotelId, 2, localDate);
+            RoomByHotelAndDate third = new RoomByHotelAndDate(hotelId, 2, localDate);
+            third.setBookingStatus(BookingStatus.BOOKED);
+            allRoomsInHotel.add(first);
+            allRoomsInHotel.add(second);
+            allRoomsInHotel.add(third);
+            return allRoomsInHotel;
+        }
     }
 
     /**

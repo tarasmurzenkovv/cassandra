@@ -74,7 +74,9 @@ public class GuestServiceImpl implements GuestService {
         return bookingRequest;
     }
 
-    private void validateFoundRoomsByHotelAndDate(final UUID guestId, final LocalDate bookingDate, final List<RoomByHotelAndDate> bookedRoomByHotelAndDates) {
+    private void validateFoundRoomsByHotelAndDate(final UUID guestId,
+                                                  final LocalDate bookingDate,
+                                                  final List<RoomByHotelAndDate> bookedRoomByHotelAndDates) {
         if (bookedRoomByHotelAndDates.isEmpty()) {
             final String message = format("Cannot find the booked rooms for the customer id '%s' and given date '%s'",
                     guestId, format(bookingDate));

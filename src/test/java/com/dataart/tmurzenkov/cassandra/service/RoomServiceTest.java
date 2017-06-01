@@ -3,6 +3,7 @@ package com.dataart.tmurzenkov.cassandra.service;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
+import com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
@@ -17,10 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.dataart.tmurzenkov.cassandra.TestUtils.GuestTestUtils.buildRoomsInHotelAndDate;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
@@ -164,7 +165,8 @@ public class RoomServiceTest {
         final LocalDate end = start.plusDays(3);
         final SearchRequest searchRequest = new SearchRequest(start, end, hotelId);
         final List<RoomByHotelAndDate> rooms = buildRoomsInHotelAndDate(hotelId, start);
-        final List<RoomByHotelAndDate> expectedFreeRooms = rooms.stream().filter(RoomByHotelAndDate::getAvailable).collect(toList());
+        final List<RoomByHotelAndDate> expectedFreeRooms = rooms.stream()
+                .filter(e -> BookingStatus.FREE == e.getBookingStatus()).collect(toList());
         when(roomByHotelAndDateDao.findAvailableRoomsForHotelId(eq(hotelId), eq(start), eq(end)))
                 .thenReturn(rooms);
 
@@ -175,18 +177,5 @@ public class RoomServiceTest {
         assertTrue(actualFreeRoomsInTheHotel.size() == 2);
         assertTrue(actualFreeRoomsInTheHotel.containsAll(expectedFreeRooms));
         assertTrue(expectedFreeRooms.containsAll(actualFreeRoomsInTheHotel));
-    }
-
-    private List<RoomByHotelAndDate> buildRoomsInHotelAndDate(UUID hotelId, LocalDate localDate) {
-        List<RoomByHotelAndDate> allRoomsInHotel = new ArrayList<>();
-
-        RoomByHotelAndDate first = new RoomByHotelAndDate(hotelId, 1, localDate);
-        RoomByHotelAndDate second = new RoomByHotelAndDate(hotelId, 2, localDate);
-        RoomByHotelAndDate third = new RoomByHotelAndDate(hotelId, 2, localDate);
-        third.setAvailable(false);
-        allRoomsInHotel.add(first);
-        allRoomsInHotel.add(second);
-        allRoomsInHotel.add(third);
-        return allRoomsInHotel;
     }
 }

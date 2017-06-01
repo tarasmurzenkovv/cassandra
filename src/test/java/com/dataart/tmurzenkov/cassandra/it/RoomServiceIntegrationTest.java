@@ -3,18 +3,18 @@ package com.dataart.tmurzenkov.cassandra.it;
 import com.dataart.tmurzenkov.cassandra.controller.HotelController;
 import com.dataart.tmurzenkov.cassandra.controller.RoomController;
 
-import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByGuestAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByGuestAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelByCityDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomDao;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.AvailableRoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.RoomServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +61,7 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private HotelDao hotelDao;
     @Autowired
-    private RoomDao roomDao;
+    private AvailableRoomByHotelAndDateDao availableRoomByHotelAndDateDao;
     @Autowired
     private HotelByCityDao hotelByCityDao;
     @Autowired
@@ -69,7 +70,7 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
     private RoomByHotelAndDateDao roomByHotelAndDateDao;
 
     @Autowired
-    private ServiceResourceAssembler<Room, Class<RoomController>> resourceResourceAssemblerForRoom;
+    private ServiceResourceAssembler<AvailableRoomByHotelAndDate, Class<RoomController>> resourceResourceAssemblerForRoom;
     @Autowired
     private ServiceResourceAssembler<Hotel, Class<HotelController>> resourceResourceAssemblerForHotel;
 
@@ -78,7 +79,7 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
         guestDao.deleteAll();
         hotelDao.deleteAll();
         hotelByCityDao.deleteAll();
-        roomDao.deleteAll();
+        availableRoomByHotelAndDateDao.deleteAll();
         roomByHotelAndDateDao.deleteAll();
         roomByGuestAndDateDao.deleteAll();
     }
@@ -89,13 +90,13 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
         final UUID hotelId = UUID.randomUUID();
         final Address hotelAddress = buildAddress();
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
-        final Room expectedRoomToAdd = buildRoom(hotelId, roomNumber);
+        final AvailableRoomByHotelAndDate expectedAvailableRoomByHotelAndDateToAdd = buildRoom(hotelId, roomNumber, LocalDate.now());
         final Resource<Hotel> hotelResource = resourceResourceAssemblerForHotel
                 .withController(HotelController.class)
                 .toResource(expectedHotelToAdd);
-        final Resource<Room> roomResource = resourceResourceAssemblerForRoom
+        final Resource<AvailableRoomByHotelAndDate> roomResource = resourceResourceAssemblerForRoom
                 .withController(RoomController.class)
-                .toResource(expectedRoomToAdd);
+                .toResource(expectedAvailableRoomByHotelAndDateToAdd);
 
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(expectedHotelToAdd)).contentType(APPLICATION_JSON))
@@ -103,7 +104,7 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(content().string(asJson(hotelResource)));
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(expectedRoomToAdd)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(expectedAvailableRoomByHotelAndDateToAdd)).contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(content().string(asJson(roomResource)));
     }
@@ -114,16 +115,16 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
         final UUID hotelId = UUID.randomUUID();
         final Address hotelAddress = buildAddress();
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
-        final Room expectedRoomToAdd = buildRoom(hotelId, roomNumber);
-        final String message = format("The room is already inserted in DB. Room info '%s'", expectedRoomToAdd);
+        final AvailableRoomByHotelAndDate expectedAvailableRoomByHotelAndDateToAdd = buildRoom(hotelId, roomNumber, LocalDate.now());
+        final String message = format("The room is already inserted in DB. Room info '%s'", expectedAvailableRoomByHotelAndDateToAdd);
         final RuntimeException exception = new RecordExistsException(message);
 
         final Resource<Hotel> hotelResource = resourceResourceAssemblerForHotel
                 .withController(HotelController.class)
                 .toResource(expectedHotelToAdd);
-        final Resource<Room> roomResource = resourceResourceAssemblerForRoom
+        final Resource<AvailableRoomByHotelAndDate> roomResource = resourceResourceAssemblerForRoom
                 .withController(RoomController.class)
-                .toResource(expectedRoomToAdd);
+                .toResource(expectedAvailableRoomByHotelAndDateToAdd);
 
         mockMvc
                 .perform(post(ADD_HOTEL).content(asJson(expectedHotelToAdd)).contentType(APPLICATION_JSON))
@@ -131,12 +132,12 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(content().string(asJson(hotelResource)));
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(expectedRoomToAdd)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(expectedAvailableRoomByHotelAndDateToAdd)).contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(content().string(asJson(roomResource)));
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(expectedRoomToAdd)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(expectedAvailableRoomByHotelAndDateToAdd)).contentType(APPLICATION_JSON))
                 .andExpect(status().isConflict())
                 .andExpect(content().string(asJson(build(exception, RECORD_ALREADY_EXISTS, CONFLICT).getBody())));
     }
@@ -145,12 +146,12 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
     public void shouldNotAddTheRoomToUnknownHotel() throws Exception {
         final Integer roomNumber = 2;
         final UUID hotelId = UUID.randomUUID();
-        final Room expectedRoomToAdd = buildRoom(hotelId, roomNumber);
+        final AvailableRoomByHotelAndDate expectedAvailableRoomByHotelAndDateToAdd = buildRoom(hotelId, roomNumber, LocalDate.now());
         final String message = format("Cannot find the hotel for the given hotel id '%s'", hotelId);
         final RuntimeException exception = new RecordExistsException(message);
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(expectedRoomToAdd)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(expectedAvailableRoomByHotelAndDateToAdd)).contentType(APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(asJson(build(exception, RECORD_NOT_EXISTS, NOT_FOUND).getBody())));
     }
@@ -159,15 +160,16 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
     public void shouldFindAllFreeRoomsInHotel() throws Exception {
         final int daysToAdd = 6;
         final Integer numberOfRoomsToGenerate = 2;
+        final LocalDate localDateBookingRequest = LocalDate.now();
         final UUID hotelId = UUID.randomUUID();
         final Address hotelAddress = buildAddress();
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
         final UUID guestId = UUID.randomUUID();
         final Guest guest = buildNewGuest(guestId);
-        final List<Room> roomsToAdd = buildRooms(numberOfRoomsToGenerate, hotelId);
-        final Room roomToBook = roomsToAdd.get(0);
-        final Integer roomNumber = roomToBook.getRoomNumber();
-        final BookingRequest bookingRequest = buildBookingRequest(hotelId, guestId, roomNumber);
+        final List<AvailableRoomByHotelAndDate> roomsToAdd = buildRooms(numberOfRoomsToGenerate, hotelId, localDateBookingRequest);
+        final AvailableRoomByHotelAndDate availableRoomByHotelAndDateToBook = roomsToAdd.get(0);
+        final Integer roomNumber = availableRoomByHotelAndDateToBook.getRoomNumber();
+        final BookingRequest bookingRequest = buildBookingRequest(hotelId, guestId, roomNumber, localDateBookingRequest);
         final SearchRequest searchRequest = buildSearchRequest(daysToAdd, hotelId);
 
         mockMvc
@@ -192,7 +194,7 @@ public class RoomServiceIntegrationTest extends AbstractIntegrationTest {
                 .perform(post(ADD_BOOKING).content(asJson(bookingRequest)).contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated());
 
-        roomsToAdd.remove(roomToBook);
+        roomsToAdd.remove(availableRoomByHotelAndDateToBook);
 
         mockMvc
                 .perform(post(GET_FREE_ROOMS).content(asJson(searchRequest)).contentType(APPLICATION_JSON))

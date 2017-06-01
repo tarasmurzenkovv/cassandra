@@ -1,14 +1,12 @@
 package com.dataart.tmurzenkov.cassandra.service.impl;
 
 import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
-import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByGuestAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByHotelAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomDao;
+import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByGuestAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.AvailableRoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
@@ -20,7 +18,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus.BOOKED;
 import static com.dataart.tmurzenkov.cassandra.service.impl.RecordValidator.validator;
 import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
@@ -38,26 +35,22 @@ import static java.util.stream.Collectors.toList;
 public class GuestServiceImpl implements GuestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestServiceImpl.class);
     private final GuestDao guestDao;
-    private final RoomDao roomDao;
+    private final AvailableRoomByHotelAndDateDao availableRoomByHotelAndDateDao;
     private final RoomByGuestAndDateDao roomByGuestAndDateDao;
-    private final RoomByHotelAndDateDao roomByHotelAndDateDao;
 
     /**
      * The below services will be autowired by Spring automatically.
      *
-     * @param guestDao              {@link GuestDao}
-     * @param roomByGuestAndDateDao {@link RoomByGuestAndDateDao}
-     * @param roomDao               {@link RoomDao}
-     * @param roomByHotelAndDateDao {@link RoomByHotelAndDateDao}
+     * @param guestDao                       {@link GuestDao}
+     * @param roomByGuestAndDateDao          {@link RoomByGuestAndDateDao}
+     * @param availableRoomByHotelAndDateDao {@link AvailableRoomByHotelAndDateDao}
      */
     public GuestServiceImpl(GuestDao guestDao,
-                            RoomDao roomDao,
-                            RoomByGuestAndDateDao roomByGuestAndDateDao,
-                            RoomByHotelAndDateDao roomByHotelAndDateDao) {
+                            AvailableRoomByHotelAndDateDao availableRoomByHotelAndDateDao,
+                            RoomByGuestAndDateDao roomByGuestAndDateDao) {
         this.guestDao = guestDao;
         this.roomByGuestAndDateDao = roomByGuestAndDateDao;
-        this.roomByHotelAndDateDao = roomByHotelAndDateDao;
-        this.roomDao = roomDao;
+        this.availableRoomByHotelAndDateDao = availableRoomByHotelAndDateDao;
     }
 
     @Override
@@ -70,29 +63,29 @@ public class GuestServiceImpl implements GuestService {
     }
 
     @Override
-    public List<Room> findBookedRoomsForTheGuestIdAndDate(UUID guestId, LocalDate bookingDate) {
+    public List<AvailableRoomByHotelAndDate> findBookedRoomsForTheGuestIdAndDate(UUID guestId, LocalDate bookingDate) {
         validateSearchParameters(guestId, bookingDate);
         LOGGER.debug("Going to look for the booked rooms for the guest id '{}' and '{}'", guestId, bookingDate);
-        final List<Room> bookedRooms = roomByGuestAndDateDao
-                .getAllBookedRooms(guestId, bookingDate).stream().map(Room::new).collect(toList());
-        if (bookedRooms.isEmpty()) {
+        final List<AvailableRoomByHotelAndDate> bookedAvailableRoomByHotelAndDates = roomByGuestAndDateDao
+                .getAllBookedRooms(guestId, bookingDate).stream().map(AvailableRoomByHotelAndDate::new).collect(toList());
+        if (bookedAvailableRoomByHotelAndDates.isEmpty()) {
             final String message = format("Cannot find the booked rooms for the customer id '%s' and given date '%s'",
                     guestId, format(bookingDate));
             throw new RecordNotFoundException(message);
         }
-        LOGGER.debug("Guest with id '{}' has the following booked rooms '{}'", guestId, makeString(bookedRooms));
-        return bookedRooms;
+        LOGGER.debug("Guest with id '{}' has the following booked rooms '{}'", guestId, makeString(bookedAvailableRoomByHotelAndDates));
+        return bookedAvailableRoomByHotelAndDates;
     }
 
     @Override
     public BookingRequest performBooking(BookingRequest bookingRequest) {
         validateBookingRequest(bookingRequest);
-        final RoomByHotelAndDate hotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
         final RoomByGuestAndDate guestAndDate = new RoomByGuestAndDate(bookingRequest);
-        checkIfExists(hotelAndDate);
-        checkIfBooked(hotelAndDate);
+        final AvailableRoomByHotelAndDate availableRoomByHotelAndDate = new AvailableRoomByHotelAndDate(bookingRequest);
+        checkIfExists(availableRoomByHotelAndDate);
+        checkIfBooked(guestAndDate);
         guestAndDate.setConfirmationNumber(valueOf(generateConfirmationNumber(bookingRequest)));
-        roomByHotelAndDateDao.insert(hotelAndDate);
+        availableRoomByHotelAndDateDao.insert(availableRoomByHotelAndDate);
         roomByGuestAndDateDao.insert(guestAndDate);
         return bookingRequest;
     }
@@ -114,7 +107,7 @@ public class GuestServiceImpl implements GuestService {
 
     private void validateBookingRequest(BookingRequest bookingRequest) {
         if (null == bookingRequest) {
-            throw new IllegalArgumentException("Cannot perform booking for empty booking request. ");
+            throw new IllegalArgumentException("Cannot perform reservation for empty reservation request. ");
         }
     }
 
@@ -123,25 +116,25 @@ public class GuestServiceImpl implements GuestService {
             throw new IllegalArgumentException("Cannot perform search of the booked room for the null guest id ");
         }
         if (null == bookingDate) {
-            throw new IllegalArgumentException("Cannot perform search of the booked room for the null booking date ");
+            throw new IllegalArgumentException("Cannot perform search of the booked room for the null reservation date ");
         }
     }
 
-    private void checkIfExists(RoomByHotelAndDate roomByHotelAndDate) {
+    private void checkIfExists(AvailableRoomByHotelAndDate availableRoomByHotelAndDate) {
         final String exceptionMessage = format("The following room does not exists. Room number: '%s', hotel id: '%s',",
-                roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        final Room room = new Room(roomByHotelAndDate);
-        validator()
-                .withCondition(e -> !roomDao.exists(e.getCompositeId()))
-                .onConditionFailureThrow(() -> new RecordNotFoundException(exceptionMessage))
-                .doValidate(room);
+                availableRoomByHotelAndDate.getRoomNumber(), availableRoomByHotelAndDate.getId());
+        AvailableRoomByHotelAndDate one = availableRoomByHotelAndDateDao.findOne(availableRoomByHotelAndDate.getId(),
+                availableRoomByHotelAndDate.getDate(),
+                availableRoomByHotelAndDate.getRoomNumber());
+        if (one == null) {
+            throw new RecordNotFoundException(exceptionMessage);
+        }
     }
 
-    private void checkIfBooked(RoomByHotelAndDate roomByHotelAndDate) {
+    private void checkIfBooked(RoomByGuestAndDate roomByGuestAndDate) {
         final String exceptionMessage = format("The following room is already booked. Room number: '%s', hotel id: '%s'",
-                roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        final RoomByHotelAndDate exists = roomByHotelAndDateDao.findOne(roomByHotelAndDate.getCompositeId());
-        if (exists != null && BOOKED == exists.getStatus()) {
+                roomByGuestAndDate.getRoomNumber(), roomByGuestAndDate.getHotelId());
+        if (roomByGuestAndDateDao.exists(roomByGuestAndDate.getCompositeId())) {
             throw new RecordExistsException(exceptionMessage);
         }
     }

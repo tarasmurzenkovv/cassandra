@@ -1,12 +1,12 @@
 package com.dataart.tmurzenkov.cassandra.service;
 
-import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByGuestAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.booking.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByGuestAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomDao;
+import com.dataart.tmurzenkov.cassandra.dao.hotel.AvailableRoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
@@ -54,7 +54,7 @@ public class GuestServiceTest {
     @Mock
     private GuestDao guestDao;
     @Mock
-    private RoomDao roomDao;
+    private AvailableRoomByHotelAndDateDao availableRoomByHotelAndDateDao;
     @Mock
     private RoomByHotelAndDateDao byHotelAndDateDao;
     @Mock
@@ -66,18 +66,22 @@ public class GuestServiceTest {
     public void shouldBookRoom() {
         final Integer roomNumber = 1;
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
-        final RoomByHotelAndDate expectedRoomByHotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
+        final AvailableRoomByHotelAndDate availableRoomByHotelAndDate = new AvailableRoomByHotelAndDate(bookingRequest);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
         expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
-        when(byHotelAndDateDao.insert(any(RoomByHotelAndDate.class))).thenReturn(expectedRoomByHotelAndDate);
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
-        when(roomDao.exists(any())).thenReturn(true);
+        when(availableRoomByHotelAndDateDao
+                .findOne(eq(availableRoomByHotelAndDate.getId()), eq(availableRoomByHotelAndDate.getDate()), eq(availableRoomByHotelAndDate.getRoomNumber())))
+                .thenReturn(availableRoomByHotelAndDate);
 
         sut.performBooking(bookingRequest);
 
-        verify(byHotelAndDateDao).findOne(eq(expectedRoomByHotelAndDate.getCompositeId()));
-        verify(byHotelAndDateDao).insert(eq(expectedRoomByHotelAndDate));
+        verify(availableRoomByHotelAndDateDao)
+                .findOne(eq(availableRoomByHotelAndDate.getId()),
+                        eq(availableRoomByHotelAndDate.getDate()),
+                        eq(availableRoomByHotelAndDate.getRoomNumber()));
+        verify(availableRoomByHotelAndDateDao).insert(eq(availableRoomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
         verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));
@@ -85,7 +89,7 @@ public class GuestServiceTest {
 
     @Test
     public void shouldNotBookRoomForNullBookingRequest() {
-        final String exceptionMessage = "Cannot perform booking for empty booking request. ";
+        final String exceptionMessage = "Cannot perform reservation for empty reservation request. ";
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(exceptionMessage);
 
@@ -102,6 +106,7 @@ public class GuestServiceTest {
     public void shouldThrowAlreadyBookedException() {
         final Integer roomNumber = 1;
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
+        final AvailableRoomByHotelAndDate availableRoomByHotelAndDate = new AvailableRoomByHotelAndDate(bookingRequest);
         final RoomByHotelAndDate expectedRoomByHotelAndDate = new RoomByHotelAndDate(bookingRequest, BOOKED);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
         final String exceptionMessage = format("The following room is already booked. Room number: '%d', hotel id: '%s'",
@@ -110,12 +115,12 @@ public class GuestServiceTest {
         thrown.expect(RecordExistsException.class);
         thrown.expectMessage(exceptionMessage);
 
-        when(byHotelAndDateDao.findOne(eq(expectedRoomByHotelAndDate.getCompositeId()))).thenReturn(expectedRoomByHotelAndDate);
-        when(roomDao.exists(any())).thenReturn(true);
+        when(byGuestAndDateDao.exists(eq(expectedRoomByGuestAndDate.getCompositeId()))).thenReturn(true);
+        when(availableRoomByHotelAndDateDao.findOne(any(), any(), any())).thenReturn(availableRoomByHotelAndDate);
 
         sut.performBooking(bookingRequest);
 
-        verify(byHotelAndDateDao).findOne(eq(expectedRoomByHotelAndDate.getCompositeId()));
+        verify(byHotelAndDateDao).exists(eq(expectedRoomByHotelAndDate.getCompositeId()));
         verify(byHotelAndDateDao, never()).insert(eq(expectedRoomByHotelAndDate));
         verify(byGuestAndDateDao, never()).insert(eq(expectedRoomByGuestAndDate));
         verify(byHotelAndDateDao, never()).save(any(RoomByHotelAndDate.class));
@@ -128,17 +133,17 @@ public class GuestServiceTest {
         final UUID guestId = randomUUID();
         final LocalDate bookingDate = now();
         final List<RoomByGuestAndDate> roomByGuestAndDates = generateRooms(guestId, bookingDate, roomsFound);
-        final List<Room> expectedBookedRooms = roomByGuestAndDates.stream().map(Room::new).collect(toList());
+        final List<AvailableRoomByHotelAndDate> expectedBookedAvailableRoomByHotelAndDates = roomByGuestAndDates.stream().map(AvailableRoomByHotelAndDate::new).collect(toList());
 
         when(byGuestAndDateDao.getAllBookedRooms(eq(guestId), eq(bookingDate))).thenReturn(roomByGuestAndDates);
 
-        List<Room> actualBookedRooms = sut.findBookedRoomsForTheGuestIdAndDate(guestId, bookingDate);
+        List<AvailableRoomByHotelAndDate> actualBookedAvailableRoomByHotelAndDates = sut.findBookedRoomsForTheGuestIdAndDate(guestId, bookingDate);
 
         verify(byGuestAndDateDao).getAllBookedRooms(eq(guestId), eq(bookingDate));
-        assertFalse(actualBookedRooms.isEmpty());
-        assertEquals(actualBookedRooms.size(), expectedBookedRooms.size());
-        assertTrue(expectedBookedRooms.containsAll(actualBookedRooms));
-        assertTrue(actualBookedRooms.containsAll(expectedBookedRooms));
+        assertFalse(actualBookedAvailableRoomByHotelAndDates.isEmpty());
+        assertEquals(actualBookedAvailableRoomByHotelAndDates.size(), expectedBookedAvailableRoomByHotelAndDates.size());
+        assertTrue(expectedBookedAvailableRoomByHotelAndDates.containsAll(actualBookedAvailableRoomByHotelAndDates));
+        assertTrue(actualBookedAvailableRoomByHotelAndDates.containsAll(expectedBookedAvailableRoomByHotelAndDates));
     }
 
     @Test
@@ -165,7 +170,7 @@ public class GuestServiceTest {
 
     @Test
     public void shouldThrowExceptionsForNullBookingDateWhenLookingForBookedRooms() {
-        final String exceptionMessage = "Cannot perform search of the booked room for the null booking date ";
+        final String exceptionMessage = "Cannot perform search of the booked room for the null reservation date ";
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(exceptionMessage);
         sut.findBookedRoomsForTheGuestIdAndDate(randomUUID(), null);

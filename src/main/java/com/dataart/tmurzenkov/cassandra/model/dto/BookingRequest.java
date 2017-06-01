@@ -14,11 +14,11 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Represents the booking request dto object. JSR 303 annotations are being used to validate the dto.
+ * Represents the reservation request dto object. JSR 303 annotations are being used to validate the dto.
  *
  * @author tmurzenkov
  */
-@ApiModel(value = "BookingRequest", description = "The booking request object.")
+@ApiModel(value = "BookingRequest", description = "The reservation request object.")
 public class BookingRequest {
     @NotNull(message = "The guest id must not be null. ")
     @ApiModelProperty(value = "The UUID representation of the guest id", required = true, dataType = "String representation of the UUID. ")
@@ -30,9 +30,9 @@ public class BookingRequest {
     @Min(message = "The room number must be more than zero. ", value = 0)
     @ApiModelProperty(value = "The room number", required = true, dataType = "String representation of the integer. ")
     private Integer roomNumber;
-    @NotNull(message = "The booking date must not be null. ")
+    @NotNull(message = "The reservation date must not be null. ")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @ApiModelProperty(value = "The booking date", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
+    @ApiModelProperty(value = "The reservation date", required = true, dataType = "Date in format 'yyyy-MM-dd'. ")
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate bookingDate;

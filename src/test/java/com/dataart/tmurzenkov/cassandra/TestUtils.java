@@ -6,13 +6,14 @@ import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -238,7 +239,7 @@ public final class TestUtils {
         }
 
         /**
-         * Factory method to create booking request.
+         * Factory method to create reservation request.
          *
          * @return {@link BookingRequest}
          */
@@ -247,7 +248,7 @@ public final class TestUtils {
         }
 
         /**
-         * Factory method to create booking request.
+         * Factory method to create reservation request.
          *
          * @param guestId {@link UUID}
          * @param hotelId {@link UUID}
@@ -268,10 +269,24 @@ public final class TestUtils {
         public static BookingRequest buildBookingRequest(UUID hotelId, UUID guestId, Integer roomNumber) {
             return new BookingRequest(guestId, hotelId, roomNumber, now().plusDays(4));
         }
+
+        /**
+         * Factory method to create reservation request.
+         *
+         * @param guestId    {@link UUID}
+         * @param hotelId    {@link UUID}
+         * @param roomNumber {@link Integer}
+         * @param localDate  {@link LocalDate}
+         * @return {@link BookingRequest}
+         */
+        public static BookingRequest buildBookingRequest(UUID hotelId, UUID guestId, Integer roomNumber, LocalDate localDate) {
+            return new BookingRequest(guestId, hotelId, roomNumber, localDate);
+        }
+
     }
 
     /**
-     * {@link Room} test utils.
+     * {@link AvailableRoomByHotelAndDate} test utils.
      *
      * @author tmurzenkov
      */
@@ -279,22 +294,22 @@ public final class TestUtils {
         /**
          * Factory method to create room.
          *
-         * @return {@link Room}
+         * @return {@link AvailableRoomByHotelAndDate}
          */
-        public static Room buildRoom() {
+        public static AvailableRoomByHotelAndDate buildRoom() {
             int randomRoomNumber = ThreadLocalRandom.current().nextInt(0, 11);
-            return new Room(UUID.randomUUID(), randomRoomNumber);
+            return new AvailableRoomByHotelAndDate(UUID.randomUUID(), randomRoomNumber, LocalDate.now());
         }
 
         /**
          * Factory method to create room from hotel id.
          *
          * @param hotelId {@link UUID}
-         * @return {@link Room}
+         * @return {@link AvailableRoomByHotelAndDate}
          */
-        public static Room buildRoom(UUID hotelId) {
+        public static AvailableRoomByHotelAndDate buildRoom(UUID hotelId) {
             int randomRoomNumber = ThreadLocalRandom.current().nextInt(0, 11);
-            return new Room(hotelId, randomRoomNumber);
+            return new AvailableRoomByHotelAndDate(hotelId, randomRoomNumber, LocalDate.now());
         }
 
         /**
@@ -302,19 +317,20 @@ public final class TestUtils {
          *
          * @param hotelId    {@link UUID}
          * @param roomNumber {@link Integer}
-         * @return {@link Room}
+         * @param localDate  {@link LocalDate}
+         * @return {@link AvailableRoomByHotelAndDate}
          */
-        public static Room buildRoom(UUID hotelId, Integer roomNumber) {
-            return new Room(hotelId, roomNumber);
+        public static AvailableRoomByHotelAndDate buildRoom(UUID hotelId, Integer roomNumber, LocalDate localDate) {
+            return new AvailableRoomByHotelAndDate(hotelId, roomNumber, localDate);
         }
 
         /**
          * Factory method to create list of rooms.
          *
          * @param numberToBuild {@link Integer}
-         * @return list of {@link Room}
+         * @return list of {@link AvailableRoomByHotelAndDate}
          */
-        public static List<Room> buildRooms(Integer numberToBuild) {
+        public static List<AvailableRoomByHotelAndDate> buildRooms(Integer numberToBuild) {
             return IntStream.of(0, numberToBuild).mapToObj(ids -> buildRoom()).collect(toList());
         }
 
@@ -323,10 +339,22 @@ public final class TestUtils {
          *
          * @param numberToBuild {@link Integer}
          * @param hotelId       {@link UUID}
-         * @return list of {@link Room}
+         * @return list of {@link AvailableRoomByHotelAndDate}
          */
-        public static List<Room> buildRooms(Integer numberToBuild, UUID hotelId) {
-            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids)).collect(toList());
+        public static List<AvailableRoomByHotelAndDate> buildRooms(Integer numberToBuild, UUID hotelId) {
+            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids, LocalDate.now())).collect(toList());
+        }
+
+        /**
+         * Factory method to create list of rooms from hotel id.
+         *
+         * @param numberToBuild {@link Integer}
+         * @param hotelId       {@link UUID}
+         * @param localDate     {@link LocalDate}
+         * @return list of {@link AvailableRoomByHotelAndDate}
+         */
+        public static List<AvailableRoomByHotelAndDate> buildRooms(Integer numberToBuild, UUID hotelId, LocalDate localDate) {
+            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids, localDate)).collect(toList());
         }
     }
 }

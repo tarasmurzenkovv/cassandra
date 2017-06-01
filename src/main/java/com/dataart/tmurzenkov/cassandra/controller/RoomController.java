@@ -1,7 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.service.RoomService;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.wordnik.swagger.annotations.Api;
@@ -27,19 +27,18 @@ import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.BAD_
 import static com.dataart.tmurzenkov.cassandra.controller.uri.RoomUris.GET_FREE_ROOMS;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.Uris.ADD_ROOM;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
- * Room controller.
+ * AvailableRoomByHotelAndDate controller.
  *
  * @author tmurzenkov
  */
 @RestController
-@Api(value = "Room operations. ", description = "REST API to manage hotel rooms in the booking system. ")
+@Api(value = "AvailableRoomByHotelAndDate operations. ", description = "REST API to manage hotel rooms in the reservation system. ")
 public class RoomController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomController.class);
-    private final ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler;
+    private final ServiceResourceAssembler<AvailableRoomByHotelAndDate, Class<RoomController>> resourceAssembler;
     private final RoomService roomService;
 
     /**
@@ -48,34 +47,37 @@ public class RoomController {
      * @param resourceAssembler {@link ServiceResourceAssembler}
      * @param roomService       {@link RoomService}
      */
-    public RoomController(ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler, RoomService roomService) {
+    public RoomController(ServiceResourceAssembler<AvailableRoomByHotelAndDate, Class<RoomController>> resourceAssembler,
+                          RoomService roomService) {
         this.resourceAssembler = resourceAssembler;
         this.roomService = roomService;
     }
 
     /**
-     * Adds new hotel room to the system.
+     * Adds new hotel availableRoomByHotelAndDate to the system.
      *
-     * @param room {@link Room}
+     * @param availableRoomByHotelAndDate {@link AvailableRoomByHotelAndDate}
      * @return {@link Resource}
      */
-    @ApiOperation(value = "Adds new room to the system.", notes = "Adds new hotel room to the system and returns the location header. ")
+    @ApiOperation(value = "Adds new availableRoomByHotelAndDate to the system.",
+            notes = "Adds new hotel availableRoomByHotelAndDate to the system and returns the location header. ")
     @RequestMapping(path = ADD_ROOM, method = POST, consumes = "application/json", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ApiResponses({
-            @ApiResponse(code = CREATED, message = "Add room to the hotel. "),
+            @ApiResponse(code = CREATED, message = "Add availableRoomByHotelAndDate to the hotel. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
-    public Resource<Room> addRoomToTheHotel(@RequestBody @Valid Room room) {
-        LOGGER.info("Going to add the following room into the data base '{}'", room);
-        Room addedRoom = roomService.addRoomToHotel(room);
-        return resourceAssembler.withController(RoomController.class).toResource(addedRoom);
+    public Resource<AvailableRoomByHotelAndDate> addRoomToTheHotel(@RequestBody @Valid
+                                                                           AvailableRoomByHotelAndDate availableRoomByHotelAndDate) {
+        LOGGER.info("Going to add the following availableRoomByHotelAndDate into the data base '{}'", availableRoomByHotelAndDate);
+        AvailableRoomByHotelAndDate addedAvailableRoomByHotelAndDate = roomService.addRoomToHotel(availableRoomByHotelAndDate);
+        return resourceAssembler.withController(RoomController.class).toResource(addedAvailableRoomByHotelAndDate);
     }
 
     /**
      * Find free rooms by hotel id and within time interval.
      *
      * @param searchRequest {@link SearchRequest}
-     * @return {@link List} of {@link Resource} of {@link Room}
+     * @return {@link List} of {@link Resource} of {@link AvailableRoomByHotelAndDate}
      */
     @ApiOperation(value = "Finds free rooms.", notes = "Finds free rooms by hotel id")
     @RequestMapping(path = GET_FREE_ROOMS, method = POST, produces = APPLICATION_JSON_VALUE)
@@ -84,10 +86,9 @@ public class RoomController {
             @ApiResponse(code = FOUND, message = "Found free rooms in the hotel. "),
             @ApiResponse(code = NOT_FOUND, message = "Not found free rooms in the hotel. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
-    public List<Resource<Room>> findFreeRooms(@RequestBody @Valid SearchRequest searchRequest) {
+    public List<Resource<AvailableRoomByHotelAndDate>> findFreeRooms(@RequestBody @Valid SearchRequest searchRequest) {
         LOGGER.info("Going to find the free rooms for the following request: '{}'", searchRequest);
-        List<Room> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(searchRequest);
+        List<AvailableRoomByHotelAndDate> freeRoomsByHotelId = roomService.findFreeRoomsInTheHotel(searchRequest);
         return resourceAssembler.toResource(freeRoomsByHotelId);
     }
-
 }

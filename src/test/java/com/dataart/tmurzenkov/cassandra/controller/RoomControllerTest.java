@@ -2,7 +2,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.TestUtils;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.RoomServiceImpl;
@@ -36,7 +36,6 @@ import static java.lang.String.format;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,7 +51,7 @@ public class RoomControllerTest {
     @Mock
     private RoomServiceImpl roomService;
     @Mock
-    private ServiceResourceAssembler<Room, Resource<Room>> serviceResourceAssembler;
+    private ServiceResourceAssembler<AvailableRoomByHotelAndDate, Resource<AvailableRoomByHotelAndDate>> serviceResourceAssembler;
     @InjectMocks
     private RoomController sut;
     private MockMvc mockMvc;
@@ -74,30 +73,30 @@ public class RoomControllerTest {
 
     @Test
     public void shouldAddRoom() throws Exception {
-        final Room room = buildRoom();
-        final Resource<Room> roomResource = new Resource<>(room);
+        final AvailableRoomByHotelAndDate availableRoomByHotelAndDate = buildRoom();
+        final Resource<AvailableRoomByHotelAndDate> roomResource = new Resource<>(availableRoomByHotelAndDate);
 
-        when(roomService.addRoomToHotel(eq(room))).thenReturn(room);
+        when(roomService.addRoomToHotel(eq(availableRoomByHotelAndDate))).thenReturn(availableRoomByHotelAndDate);
         when(serviceResourceAssembler.withController(eq(sut.getClass()))).thenReturn(serviceResourceAssembler);
-        when(serviceResourceAssembler.toResource(eq(room))).thenReturn(roomResource);
+        when(serviceResourceAssembler.toResource(eq(availableRoomByHotelAndDate))).thenReturn(roomResource);
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(room)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(availableRoomByHotelAndDate)).contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(content().string(asJson(roomResource)));
     }
 
     @Test
     public void shouldNotAddTheSameRoomTwice() throws Exception {
-        final Room room = buildRoom();
-        final String exceptionMessage = format("The room is already inserted in DB. Room info '%s'", room);
+        final AvailableRoomByHotelAndDate availableRoomByHotelAndDate = buildRoom();
+        final String exceptionMessage = format("The availableRoomByHotelAndDate is already inserted in DB. AvailableRoomByHotelAndDate info '%s'", availableRoomByHotelAndDate);
         final RuntimeException alreadyAddedRoom = new RecordExistsException(exceptionMessage);
         final ResponseEntity response = TestUtils.HttpResponseTest.build(alreadyAddedRoom, RECORD_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
 
-        when(roomService.addRoomToHotel(eq(room))).thenThrow(alreadyAddedRoom);
+        when(roomService.addRoomToHotel(eq(availableRoomByHotelAndDate))).thenThrow(alreadyAddedRoom);
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(room)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(availableRoomByHotelAndDate)).contentType(APPLICATION_JSON))
                 .andExpect(status().isConflict())
                 .andExpect(content().string(asJson(response.getBody())));
     }
@@ -108,14 +107,14 @@ public class RoomControllerTest {
         final LocalDate end = start.plusDays(3);
         final UUID hotelId = UUID.randomUUID();
         final SearchRequest searchRequest = new SearchRequest(start, end, hotelId);
-        final List<Room> rooms = buildRooms(3);
-        List<Resource<Room>> roomAsResources = rooms.stream().map(room -> new Resource<>(room)).collect(Collectors.toList());
+        final List<AvailableRoomByHotelAndDate> availableRoomByHotelAndDates = buildRooms(3);
+        List<Resource<AvailableRoomByHotelAndDate>> roomAsResources = availableRoomByHotelAndDates.stream().map(room -> new Resource<>(room)).collect(Collectors.toList());
 
-        when(roomService.findFreeRoomsInTheHotel(eq(searchRequest))).thenReturn(rooms);
-        when(serviceResourceAssembler.toResource(eq(rooms))).thenReturn(roomAsResources);
+        when(roomService.findFreeRoomsInTheHotel(eq(searchRequest))).thenReturn(availableRoomByHotelAndDates);
+        when(serviceResourceAssembler.toResource(eq(availableRoomByHotelAndDates))).thenReturn(roomAsResources);
 
         mockMvc
-                .perform(get(GET_FREE_ROOMS).content(asJson(searchRequest)).contentType(APPLICATION_JSON))
+                .perform(post(GET_FREE_ROOMS).content(asJson(searchRequest)).contentType(APPLICATION_JSON))
                 .andExpect(status().isFound())
                 .andExpect(content().string(asJson(roomAsResources)));
     }
@@ -124,7 +123,7 @@ public class RoomControllerTest {
     public void shouldNotFindAllBookedRoomsForReverseStartEnd() throws Exception {
         final SearchRequest searchRequest = new SearchRequest();
         mockMvc
-                .perform(get(GET_FREE_ROOMS).content(asJson(searchRequest)).contentType(APPLICATION_JSON))
+                .perform(post(GET_FREE_ROOMS).content(asJson(searchRequest)).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 }

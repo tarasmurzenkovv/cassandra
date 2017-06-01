@@ -7,6 +7,6 @@ package com.dataart.tmurzenkov.cassandra.controller.uri;
  */
 public interface GuestUris {
     String ADD_GUEST = "/api/add/guest";
-    String ADD_BOOKING = "/api/add/booking";
+    String ADD_BOOKING = "/api/add/reservation";
     String ROOMS_BY_GUEST_AND_DATE = "/api/get/roombyguest/{guestId}/{date}";
 }

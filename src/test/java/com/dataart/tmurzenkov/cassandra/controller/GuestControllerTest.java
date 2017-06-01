@@ -2,7 +2,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.GuestServiceImpl;
@@ -194,7 +194,7 @@ public class GuestControllerTest {
     public void shouldNotExecuteBookingRequestForEmptyBookingDate() throws Exception {
         final BookingRequest bookingRequest = buildBookingRequest();
         final String expectedContent =
-                "{\"exceptionMessage\":\"The booking date must not be null. \",\"exceptionDescription\":\"INVALID_PARAMETERS\"}";
+                "{\"exceptionMessage\":\"The reservation date must not be null. \",\"exceptionDescription\":\"INVALID_PARAMETERS\"}";
         bookingRequest.setBookingDate(null);
 
         mockMvc
@@ -207,11 +207,11 @@ public class GuestControllerTest {
     public void shouldLookForBookedRoomsForCustomerIdAndBookingDate() throws Exception {
         final UUID guestId = UUID.randomUUID();
         final LocalDate bookingDate = now();
-        List<Room> rooms = buildRooms(10);
-        when(guestService.findBookedRoomsForTheGuestIdAndDate(eq(guestId), eq(bookingDate))).thenReturn(rooms);
+        List<AvailableRoomByHotelAndDate> availableRoomByHotelAndDates = buildRooms(10);
+        when(guestService.findBookedRoomsForTheGuestIdAndDate(eq(guestId), eq(bookingDate))).thenReturn(availableRoomByHotelAndDates);
         mockMvc
                 .perform(get(ROOMS_BY_GUEST_AND_DATE, guestId, format(bookingDate)))
                 .andExpect(status().isFound())
-                .andExpect(content().string(asJson(rooms)));
+                .andExpect(content().string(asJson(availableRoomByHotelAndDates)));
     }
 }

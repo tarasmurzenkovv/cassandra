@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.dao.booking;
+package com.dataart.tmurzenkov.cassandra.dao.reservation;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import org.springframework.data.cassandra.repository.CassandraRepository;
@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface RoomByGuestAndDateDao extends CassandraRepository<RoomByGuestAndDate> {
 
     /**
-     * Selects/finds all instances of the {@link RoomByGuestAndDate} for the specified guest id and booking date.
+     * Selects/finds all instances of the {@link RoomByGuestAndDate} for the specified guest id and reservation date.
      *
      * @param guestId     {@link UUID} guest id
      * @param bookingDate {@link LocalDate} date

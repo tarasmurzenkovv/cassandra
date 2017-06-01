@@ -43,7 +43,7 @@ public class RoomByGuestAndDate extends BasicEntity {
      * Constructor.
      *
      * @param id          guest id
-     * @param bookingDate booking date
+     * @param bookingDate reservation date
      * @param roomNumber  room number
      */
     public RoomByGuestAndDate(UUID id, LocalDate bookingDate, Integer roomNumber) {
@@ -60,13 +60,16 @@ public class RoomByGuestAndDate extends BasicEntity {
     public RoomByGuestAndDate(BookingRequest bookingRequest) {
         this.hotelId = bookingRequest.getHotelId();
         this.id = bookingRequest.getGuestId();
+        this.hotelId = bookingRequest.getHotelId();
         this.bookingDate = bookingRequest.getBookingDate();
         this.roomNumber = bookingRequest.getRoomNumber();
     }
 
     @Override
     public MapId getCompositeId() {
-        return BasicMapId.id("id", this.id).with("bookingDate", this.bookingDate);
+        return BasicMapId.id("id", this.id)
+                .with("bookingDate", this.bookingDate)
+                .with("roomNumber", this.roomNumber).with("hotelId", this.hotelId);
     }
 
     public UUID getHotelId() {

@@ -2,7 +2,7 @@ package com.dataart.tmurzenkov.cassandra.service;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -25,16 +25,16 @@ public interface GuestService {
     Guest registerNewGuest(Guest guest);
 
     /**
-     * Finds all booked {@link Room}s in by the provided {@link UUID} guest id.
+     * Finds all booked {@link AvailableRoomByHotelAndDate}s in by the provided {@link UUID} guest id.
      *
      * @param guestId     {@link UUID}
      * @param bookingDate {@link Date}
-     * @return {@link List} of {@link Room}
+     * @return {@link List} of {@link AvailableRoomByHotelAndDate}
      */
-    List<Room> findBookedRoomsForTheGuestIdAndDate(UUID guestId, LocalDate bookingDate);
+    List<AvailableRoomByHotelAndDate> findBookedRoomsForTheGuestIdAndDate(UUID guestId, LocalDate bookingDate);
 
     /**
-     * Performs the actual booking.
+     * Performs the actual reservation.
      *
      * @param bookingRequest {@link BookingRequest}
      * @return {@link BookingRequest}

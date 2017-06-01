@@ -2,29 +2,29 @@ package com.dataart.tmurzenkov.cassandra.service;
 
 
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 
 import java.util.List;
 
 /**
- * Room service.
+ * AvailableRoomByHotelAndDate service.
  *
  * @author tmurzenkov
  */
 public interface RoomService {
     /**
-     * Adds new room to the hotel.
+     * Adds new availableRoomByHotelAndDate to the hotel.
      *
-     * @param room {@link Room}
-     * @return {@link Room}
+     * @param availableRoomByHotelAndDate {@link AvailableRoomByHotelAndDate}
+     * @return {@link AvailableRoomByHotelAndDate}
      */
-    Room addRoomToHotel(Room room);
+    AvailableRoomByHotelAndDate addRoomToHotel(AvailableRoomByHotelAndDate availableRoomByHotelAndDate);
 
     /**
      * Finds free rooms for the given hotel in the given time period.
      *
      * @param searchRequest start time period {@link SearchRequest}
-     * @return {@link List} of {@link Room}
+     * @return {@link List} of {@link AvailableRoomByHotelAndDate}
      */
-    List<Room> findFreeRoomsInTheHotel(SearchRequest searchRequest);
+    List<AvailableRoomByHotelAndDate> findFreeRoomsInTheHotel(SearchRequest searchRequest);
 }

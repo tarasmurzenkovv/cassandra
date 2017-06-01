@@ -17,7 +17,7 @@
         <maven-compiler-plugin-version>3.6.1</maven-compiler-plugin-version>
         <maven-war-plugin-version>3.0.0</maven-war-plugin-version>
         <checkstyle-config>src/main/resources</checkstyle-config>
-        <cassandra-version>3.2.0</cassandra-version>
+        <cassandra-version>3.1.4</cassandra-version>
         <spring-data-version>1.11.1.RELEASE</spring-data-version>
         <spring-version>4.3.7.RELEASE</spring-version>
         <spring-data-cassandra-version>1.5.3.RELEASE</spring-data-cassandra-version>

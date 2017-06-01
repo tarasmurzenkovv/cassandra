@@ -37,7 +37,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
  * @author tmurzenkov
  */
 @RestController
-@Api(description = "REST API to manage hotels in the booking system. ")
+@Api(description = "REST API to manage hotels in the reservation system. ")
 public class HotelController {
     private static final Logger LOGGER = LoggerFactory.getLogger(HotelController.class);
     private final HotelService hotelServiceImpl;

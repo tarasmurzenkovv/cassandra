@@ -3,7 +3,7 @@ package com.dataart.tmurzenkov.cassandra.controller;
 import com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.AvailableRoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -46,7 +46,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  * @author tmurzenkov
  */
 @RestController
-@Api(value = "Guest operations", description = "REST API to manage hotel guests in the booking system. ")
+@Api(value = "Guest operations", description = "REST API to manage hotel guests in the reservation system. ")
 public class GuestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestController.class);
     private final ServiceResourceAssembler<Guest, Class<GuestController>> resourceAssembler;
@@ -99,7 +99,7 @@ public class GuestController {
             @ApiResponse(code = CONFLICT, message = "The room is already booked. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public Resource<BookingRequest> bookRoom(@RequestBody @Valid BookingRequest bookingRequest) {
-        LOGGER.info("New booking request is issued '{}'", bookingRequest);
+        LOGGER.info("New reservation request is issued '{}'", bookingRequest);
         return new Resource<>(guestService.performBooking(bookingRequest));
     }
 
@@ -108,7 +108,7 @@ public class GuestController {
      *
      * @param guestId       {@link UUID}
      * @param dateToLookFor {@link Date}
-     * @return {@link List} of {@link Room}
+     * @return {@link List} of {@link AvailableRoomByHotelAndDate}
      */
     @ApiOperation(value = "Gets booked rooms for the guest id and specific date. ",
             notes = "Gets booked rooms for the guest id and specific date. ")
@@ -118,7 +118,7 @@ public class GuestController {
             @ApiResponse(code = NOT_FOUND, message = "No booked rooms were found. "),
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     @ResponseStatus(FOUND)
-    public List<Room> bookedRoomsByGuest(
+    public List<AvailableRoomByHotelAndDate> bookedRoomsByGuest(
             @ApiParam(required = true, value = "The UUID representation of the guest id. ")
             @PathVariable("guestId") @Valid UUID guestId,
             @PathVariable("date")

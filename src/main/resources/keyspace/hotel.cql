@@ -42,3 +42,14 @@ create table if not exists available_rooms_by_hotel_date(
   is_available text,
   primary key ((hotel_id), date, room_number)
 ) with comment = 'Finds available roomByHotelAndDates by hotel/date. ';
+
+create table if not exists room_booked_by_guest_and_date(
+	guest_id uuid,
+	booking_date date,
+	room_number int,
+	hotel_id uuid,
+	confirmation_number text,
+	primary key ((guest_id,booking_date),hotel_id,  room_number)
+)
+with
+   comment = 'Stores booking information about the specific roomByHotelAndDate for the provided guest id and date.';

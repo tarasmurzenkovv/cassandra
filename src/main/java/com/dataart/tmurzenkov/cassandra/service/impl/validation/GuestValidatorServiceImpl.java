@@ -1,6 +1,6 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.validation;
 
-import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
+import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.ValidatorService;

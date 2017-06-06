@@ -1,7 +1,6 @@
 package com.dataart.tmurzenkov.cassandra.it;
 
-import com.dataart.tmurzenkov.cassandra.configuration.database.HotelCassandraConfiguration;
-import com.dataart.tmurzenkov.cassandra.configuration.database.ReservationCassandraConfiguration;
+import com.dataart.tmurzenkov.cassandra.configuration.CassandraConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.List;
@@ -25,7 +23,7 @@ import java.util.List;
  */
 @EnableWebMvc
 @Configuration
-@Import({HotelCassandraConfiguration.class, ReservationCassandraConfiguration.class})
+@Import({CassandraConfiguration.class})
 @ComponentScan("com.dataart.tmurzenkov.cassandra")
 public class TestConfiguration extends WebMvcConfigurerAdapter {
     /**
@@ -36,20 +34,6 @@ public class TestConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
-    }
-
-    /**
-     * Adds resource handlers for the Swagger.
-     *
-     * @param registry {@link ResourceHandlerRegistry}
-     */
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/swagger-ui.html")
-                .addResourceLocations("classpath:/META-INF/resources/");
-
-        registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
     @Override

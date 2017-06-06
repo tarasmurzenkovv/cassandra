@@ -1,7 +1,5 @@
 package com.dataart.tmurzenkov.cassandra.configuration;
 
-import com.dataart.tmurzenkov.cassandra.configuration.database.ReservationCassandraConfiguration;
-import com.dataart.tmurzenkov.cassandra.configuration.database.HotelCassandraConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +23,7 @@ import java.util.List;
  */
 @EnableWebMvc
 @Configuration
-@Import({SwaggerConfiguration.class, HotelCassandraConfiguration.class, ReservationCassandraConfiguration.class})
+@Import({SwaggerConfiguration.class, CassandraConfiguration.class})
 @ComponentScan("com.dataart.tmurzenkov.cassandra")
 public class WebContextConfiguration extends WebMvcConfigurerAdapter {
 

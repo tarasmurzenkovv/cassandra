@@ -1,8 +1,8 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.service;
 
-import com.dataart.tmurzenkov.cassandra.dao.hotel.GuestDao;
-import com.dataart.tmurzenkov.cassandra.dao.reservation.RoomByGuestAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;

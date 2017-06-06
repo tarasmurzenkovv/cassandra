@@ -2,8 +2,8 @@ package com.dataart.tmurzenkov.cassandra.it;
 
 import com.dataart.tmurzenkov.cassandra.controller.HotelController;
 import com.dataart.tmurzenkov.cassandra.controller.uri.Uris;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelByCityDao;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
+import com.dataart.tmurzenkov.cassandra.dao.HotelByCityDao;
+import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;

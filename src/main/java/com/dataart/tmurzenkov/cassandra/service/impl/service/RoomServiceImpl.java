@@ -1,6 +1,6 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.service;
 
-import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;

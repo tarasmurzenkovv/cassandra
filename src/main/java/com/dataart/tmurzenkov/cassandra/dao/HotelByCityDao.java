@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.dao.hotel;
+package com.dataart.tmurzenkov.cassandra.dao;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.HotelByCity;
 import org.springframework.data.cassandra.repository.CassandraRepository;

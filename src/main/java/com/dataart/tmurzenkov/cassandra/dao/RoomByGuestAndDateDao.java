@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.dao.reservation;
+package com.dataart.tmurzenkov.cassandra.dao;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import org.springframework.data.cassandra.repository.CassandraRepository;

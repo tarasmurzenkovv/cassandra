@@ -1,7 +1,7 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.validation;
 
-import com.dataart.tmurzenkov.cassandra.dao.hotel.HotelDao;
-import com.dataart.tmurzenkov.cassandra.dao.hotel.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;

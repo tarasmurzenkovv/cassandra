@@ -1,35 +1,36 @@
-package com.dataart.tmurzenkov.cassandra.configuration.database;
+package com.dataart.tmurzenkov.cassandra.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.cassandra.config.CassandraSessionFactoryBean;
+import org.springframework.data.cassandra.config.java.AbstractCassandraConfiguration;
 import org.springframework.data.cassandra.core.CassandraAdminOperations;
 import org.springframework.data.cassandra.core.CassandraAdminTemplate;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
 /**
  * Cassandra spring data configuration to work with dao that are located at
- * com.dataart.tmurzenkov.cassandra.dao.reservation .
+ * com.dataart.tmurzenkov.cassandra.dao.hotel .
  *
  * @author tmurzenkov
  */
-@EnableCassandraRepositories(basePackages = "com.dataart.tmurzenkov.cassandra.dao.reservation",
-        cassandraTemplateRef = "reservationTemplate")
+@EnableCassandraRepositories(
+        basePackages = "com.dataart.tmurzenkov.cassandra.dao")
 @Configuration
-public class ReservationCassandraConfiguration extends BaseCassandraConfiguration {
-    @Value("${cassandra.keyspace.reservation}")
-    private String reservationKeySpace;
+@PropertySource(value = {"classpath:/application.properties"})
+public class CassandraConfiguration extends AbstractCassandraConfiguration {
+    @Value("${cassandra.contactpoints}")
+    protected String contactPoints;
+    @Value("${cassandra.keyspace.hotel}")
+    private String hotelKeySpace;
 
     @Override
-    @Bean(name = "reservationTemplate")
     public CassandraAdminOperations cassandraTemplate() throws Exception {
         return new CassandraAdminTemplate(session().getObject(), cassandraConverter());
     }
 
     @Override
-    @Bean(name = "reservationSession")
-    @SuppressWarnings("Duplicates")
     public CassandraSessionFactoryBean session() throws ClassNotFoundException {
 
         CassandraSessionFactoryBean session = new CassandraSessionFactoryBean();
@@ -46,6 +47,6 @@ public class ReservationCassandraConfiguration extends BaseCassandraConfiguratio
 
     @Override
     protected String getKeyspaceName() {
-        return reservationKeySpace;
+        return hotelKeySpace;
     }
 }

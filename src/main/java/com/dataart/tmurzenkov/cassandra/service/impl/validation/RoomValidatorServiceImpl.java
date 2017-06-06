@@ -1,7 +1,8 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.validation;
 
 import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
-import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomDao;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
@@ -17,37 +18,37 @@ import static java.lang.String.format;
  * @author tmurzenkov
  */
 @Service
-public class RoomValidatorServiceImpl implements ValidatorService<RoomByHotelAndDate> {
+public class RoomValidatorServiceImpl implements ValidatorService<Room> {
     @Autowired
     private HotelDao hotelDao;
     @Autowired
-    private RoomByHotelAndDateDao roomByHotelAndDateDao;
+    private RoomDao roomDao;
 
     @Override
-    public void validateInfo(final RoomByHotelAndDate roomByHotelAndDate) {
+    public void validateInfo(final Room roomByHotelAndDate) {
         if (null == roomByHotelAndDate) {
             throw new IllegalArgumentException("Cannot add the the room. It is empty. ");
         }
-        if (roomByHotelAndDate.getId() == null) {
+        if (roomByHotelAndDate.getHotelId() == null) {
             final String nullHotelId =
                     format("Hotel id is empty. Cannot add the the room with number '%d' for such hotel. Specify the hotel id",
                             roomByHotelAndDate.getRoomNumber());
             throw new IllegalArgumentException(nullHotelId);
         }
-        if (roomByHotelAndDate.getRoomNumber() == null || 0 == roomByHotelAndDate.getRoomNumber()) {
+        if (null == roomByHotelAndDate.getRoomNumber() || 0 == roomByHotelAndDate.getRoomNumber()) {
             throw new IllegalArgumentException(
                     format("Cannot add the the room with number '%d'. ", roomByHotelAndDate.getRoomNumber()));
         }
     }
 
     @Override
-    public void checkIfExists(final RoomByHotelAndDate roomByHotelAndDate) {
-        if (null == hotelDao.findOne(roomByHotelAndDate.getId())) {
-            final String cannotFindHotel = format("Cannot find the hotel for the given hotel id '%s'", roomByHotelAndDate.getId());
+    public void checkIfExists(final Room room) {
+        if (null == hotelDao.findOne(room.getHotelId())) {
+            final String cannotFindHotel = format("Cannot find the hotel for the given hotel id '%s'", room.getHotelId());
             throw new RecordNotFoundException(cannotFindHotel);
         }
-        if (roomByHotelAndDateDao.exists(roomByHotelAndDate.getCompositeId())) {
-            throw new RecordExistsException(format("The room is already inserted in DB. Room info '%s'", roomByHotelAndDate));
+        if (roomDao.exists(room.getCompositeId())) {
+            throw new RecordExistsException(format("The room is already inserted in DB. Room info '%s'", room));
         }
     }
 }

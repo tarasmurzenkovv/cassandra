@@ -1,8 +1,9 @@
 package com.dataart.tmurzenkov.cassandra.service.impl.service;
 
 import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.RoomService;
 import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
@@ -11,12 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Set;
+import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus.FREE;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * {@link RoomService} implementation.
@@ -29,30 +31,36 @@ public class RoomServiceImpl implements RoomService {
     @Autowired
     private RoomByHotelAndDateDao roomByHotelAndDateDao;
     @Autowired
-    private ValidatorService<RoomByHotelAndDate> validatorService;
+    private RoomDao roomDao;
+    @Autowired
+    private ValidatorService<Room> validatorService;
 
     @Override
-    public RoomByHotelAndDate addRoomToHotel(RoomByHotelAndDate roomByHotelAndDate) {
-        LOGGER.info("Going to add the new room to the hotel '{}'", roomByHotelAndDate);
-        validatorService.validateInfo(roomByHotelAndDate);
-        validatorService.checkIfExists(roomByHotelAndDate);
-        roomByHotelAndDate.setBookingStatus(FREE);
-        RoomByHotelAndDate addedRoomByHotelAndDate = roomByHotelAndDateDao.insert(roomByHotelAndDate);
-        LOGGER.info("Successfully added the new room to the hotel '{}'", addedRoomByHotelAndDate);
-        return addedRoomByHotelAndDate;
+    public Room addRoomToHotel(Room room) {
+        LOGGER.info("Going to add the new room to the hotel '{}'", room);
+        validatorService.validateInfo(room);
+        validatorService.checkIfExists(room);
+        Room addedRoom = roomDao.insert(room);
+        LOGGER.info("Successfully added the new room to the hotel '{}'", addedRoom);
+        return addedRoom;
     }
 
     @Override
-    public List<RoomByHotelAndDate> findFreeRoomsInTheHotel(SearchRequest searchRequest) {
-        List<RoomByHotelAndDate> freeRoomsInHotel = roomByHotelAndDateDao
-                .findAvailableRoomsForHotelId(searchRequest.getHotelId(), searchRequest.getStart(), searchRequest.getEnd())
-                .stream()
-                .filter(e -> FREE == e.getBookingStatus())
-                .collect(toList());
-        if (freeRoomsInHotel.isEmpty()) {
+    public Set<Room> findFreeRoomsInTheHotel(SearchRequest searchRequest) {
+        Set<Room> bookedRoomsInHotel = findAllRoomsBySearchRequest(searchRequest);
+        Set<Room> allRoomsInHotel = roomDao.findAllRoomsByHotelId(searchRequest.getHotelId());
+        allRoomsInHotel.removeAll(bookedRoomsInHotel);
+        if (allRoomsInHotel.isEmpty()) {
             throw new RecordNotFoundException(format("No free rooms were found for the given request '%s'", searchRequest));
         }
-        LOGGER.info("Found the following free rooms '{}'", makeString(freeRoomsInHotel));
-        return freeRoomsInHotel;
+        LOGGER.info("Found the following free rooms '{}'", makeString(bookedRoomsInHotel));
+        return allRoomsInHotel;
+    }
+
+    private Set<Room> findAllRoomsBySearchRequest(final SearchRequest searchRequest) {
+        final UUID hotelId = searchRequest.getHotelId();
+        final LocalDate start = searchRequest.getStart();
+        final LocalDate end = searchRequest.getEnd();
+        return roomByHotelAndDateDao.findAllRoomsForHotelIdAndPeriod(hotelId, start, end).stream().map(Room::new).collect(toSet());
     }
 }

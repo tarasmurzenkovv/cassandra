@@ -2,6 +2,7 @@ package com.dataart.tmurzenkov.cassandra.service.util;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
@@ -30,5 +31,16 @@ public interface StringUtils {
      */
     static <T> String makeString(List<T> list) {
         return (null == list || list.isEmpty()) ? "" : list.stream().filter(Objects::nonNull).map(Object::toString).collect(joining(", "));
+    }
+
+    /**
+     * Assembles set to {@link String} with delimiter ', '.
+     *
+     * @param set {@link Set}
+     * @param <T>  any instance
+     * @return {@link String}
+     */
+    static <T> String makeString(Set<T> set) {
+        return (null == set || set.isEmpty()) ? "" : set.stream().filter(Objects::nonNull).map(Object::toString).collect(joining(", "));
     }
 }

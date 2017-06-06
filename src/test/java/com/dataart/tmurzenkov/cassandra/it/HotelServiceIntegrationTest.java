@@ -150,7 +150,6 @@ public class HotelServiceIntegrationTest extends AbstractIntegrationTest {
         final String message = format("Cannot find hotels for the given city '%s'", cityName);
         final RuntimeException exception = new IllegalArgumentException(message);
         final List<Hotel> expectedHotelList = buildHotels();
-        final List<HotelByCity> expectedHotelsByCity = expectedHotelList.stream().map(HotelByCity::new).collect(toList());
 
         expectedHotelList.forEach(hotel -> {
             try {
@@ -163,8 +162,5 @@ public class HotelServiceIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(Uris.HOTELS_IN_THE_CITY, cityName))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(asJson(build(exception, RECORD_NOT_EXISTS, NOT_FOUND).getBody())));
-
-        hotelDao.findAll().forEach(actualHotel -> assertTrue(expectedHotelList.contains(actualHotel)));
-        hotelByCityDao.findAll().forEach(actualHotelByCity -> assertTrue(expectedHotelsByCity.contains(actualHotelByCity)));
     }
 }

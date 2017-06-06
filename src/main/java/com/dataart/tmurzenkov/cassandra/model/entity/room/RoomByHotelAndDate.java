@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
@@ -26,8 +29,10 @@ import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
  *
  * @author tmurzenkov
  */
-
-@Table("available_rooms_by_hotel_date")
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@Table(value = "room_by_hotel_and_date")
 public class RoomByHotelAndDate extends BasicEntity {
     @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
     private UUID id;
@@ -40,12 +45,6 @@ public class RoomByHotelAndDate extends BasicEntity {
     private Integer roomNumber;
     @Column("is_available")
     private BookingStatus bookingStatus;
-
-    /**
-     * Constructor.
-     */
-    public RoomByHotelAndDate() {
-    }
 
 
     /**
@@ -90,70 +89,5 @@ public class RoomByHotelAndDate extends BasicEntity {
         return BasicMapId.id("id", this.id)
                 .with("date", this.date)
                 .with("roomNumber", this.roomNumber);
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Integer getRoomNumber() {
-        return roomNumber;
-    }
-
-    public void setRoomNumber(Integer roomNumber) {
-        this.roomNumber = roomNumber;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(final LocalDate date) {
-        this.date = date;
-    }
-
-    public BookingStatus getBookingStatus() {
-        return bookingStatus;
-    }
-
-    public void setBookingStatus(final BookingStatus bookingStatus) {
-        this.bookingStatus = bookingStatus;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        RoomByHotelAndDate roomByHotelAndDate = (RoomByHotelAndDate) o;
-
-        if (id != null ? !id.equals(roomByHotelAndDate.id) : roomByHotelAndDate.id != null) {
-            return false;
-        }
-        return roomNumber != null
-                ? roomNumber.equals(roomByHotelAndDate.roomNumber) : roomByHotelAndDate.roomNumber == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (roomNumber != null ? roomNumber.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "RoomByHotelAndDate{"
-                + "hotel_id=" + id
-                + ", roomNumber=" + roomNumber
-                + '}';
     }
 }

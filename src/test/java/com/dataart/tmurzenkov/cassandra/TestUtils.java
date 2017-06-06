@@ -7,6 +7,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +18,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -26,6 +28,7 @@ import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Test Utils.
@@ -287,12 +290,12 @@ public final class TestUtils {
         /**
          * Factory method to create list of rooms.
          *
-         * @param hotelId    {@link UUID}
-         * @param localDate  {@link LocalDate}
+         * @param hotelId   {@link UUID}
+         * @param localDate {@link LocalDate}
          * @return {@link BookingRequest}
          */
-        public static List<RoomByHotelAndDate> buildRoomsInHotelAndDate(UUID hotelId, LocalDate localDate) {
-            List<RoomByHotelAndDate> allRoomsInHotel = new ArrayList<>();
+        public static Set<RoomByHotelAndDate> buildRoomsInHotelAndDate(UUID hotelId, LocalDate localDate) {
+            Set<RoomByHotelAndDate> allRoomsInHotel = new HashSet<>();
 
             RoomByHotelAndDate first = new RoomByHotelAndDate(hotelId, 1, localDate);
             RoomByHotelAndDate second = new RoomByHotelAndDate(hotelId, 2, localDate);
@@ -303,6 +306,19 @@ public final class TestUtils {
             allRoomsInHotel.add(third);
             return allRoomsInHotel;
         }
+
+        /**
+         * Factory method to create list of rooms.
+         *
+         * @param hotelId       {@link UUID}
+         * @param localDate     {@link LocalDate}
+         * @param numberToBuild {@link Integer}
+         * @return {@link BookingRequest}
+         */
+        public static Set<RoomByHotelAndDate> buildRoomsInHotelAndDate(UUID hotelId, LocalDate localDate, Integer numberToBuild) {
+            return IntStream.range(1, numberToBuild + 1).mapToObj(idx -> new RoomByHotelAndDate(hotelId, idx, localDate)).collect(toSet());
+        }
+
     }
 
     /**
@@ -337,11 +353,10 @@ public final class TestUtils {
          *
          * @param hotelId    {@link UUID}
          * @param roomNumber {@link Integer}
-         * @param localDate  {@link LocalDate}
          * @return {@link RoomByHotelAndDate}
          */
-        public static RoomByHotelAndDate buildRoom(UUID hotelId, Integer roomNumber, LocalDate localDate) {
-            return new RoomByHotelAndDate(hotelId, roomNumber, localDate);
+        public static Room buildRoom(UUID hotelId, Integer roomNumber) {
+            return new Room(hotelId, roomNumber);
         }
 
         /**
@@ -361,20 +376,8 @@ public final class TestUtils {
          * @param hotelId       {@link UUID}
          * @return list of {@link RoomByHotelAndDate}
          */
-        public static List<RoomByHotelAndDate> buildRooms(Integer numberToBuild, UUID hotelId) {
-            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids, LocalDate.now())).collect(toList());
-        }
-
-        /**
-         * Factory method to create list of rooms from hotel id.
-         *
-         * @param numberToBuild {@link Integer}
-         * @param hotelId       {@link UUID}
-         * @param localDate     {@link LocalDate}
-         * @return list of {@link RoomByHotelAndDate}
-         */
-        public static List<RoomByHotelAndDate> buildRooms(Integer numberToBuild, UUID hotelId, LocalDate localDate) {
-            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids, localDate)).collect(toList());
+        public static List<Room> buildRooms(Integer numberToBuild, UUID hotelId) {
+            return IntStream.range(1, numberToBuild + 1).mapToObj(ids -> buildRoom(hotelId, ids)).collect(toList());
         }
     }
 }

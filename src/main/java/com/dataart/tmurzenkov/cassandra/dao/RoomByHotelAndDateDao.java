@@ -5,7 +5,7 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -24,17 +24,6 @@ public interface RoomByHotelAndDateDao extends CassandraRepository<RoomByHotelAn
      * @param end     {@link LocalDate}
      * @return list of {@link RoomByHotelAndDate}
      */
-    @Query("select * from available_rooms_by_hotel_date where hotel_id = ?0 and date >= ?1 and date <= ?2")
-    List<RoomByHotelAndDate> findAvailableRoomsForHotelId(UUID hotelId, LocalDate start, LocalDate end);
-
-    /**
-     * Finds one {@link RoomByHotelAndDate}.
-     *
-     * @param id         {@link UUID}
-     * @param date       {@link LocalDate}
-     * @param roomNumber {@link Integer}
-     * @return list of {@link RoomByHotelAndDate}
-     */
-    @Query("select * from available_rooms_by_hotel_date where hotel_id = ?0 and date = ?1 and room_number = ?2")
-    RoomByHotelAndDate findOne(UUID id, LocalDate date, Integer roomNumber);
+    @Query("select * from room_by_hotel_and_date where hotel_id = ?0 and date >= ?1 and date <= ?2")
+    Set<RoomByHotelAndDate> findAllRoomsForHotelIdAndPeriod(UUID hotelId, LocalDate start, LocalDate end);
 }

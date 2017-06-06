@@ -1,8 +1,8 @@
-create keyspace hotel with replication={'class':'SimpleStrategy', 'replication_factor':3};
+create keyspace if not exists hotel with replication={'class':'SimpleStrategy', 'replication_factor':3};
 
 use hotel;
 
-create type address(
+create type if not exists address(
 	street text,
 	city text,
 	state_or_province text,
@@ -20,7 +20,6 @@ create table if not exists guest(
   primary key ((guest_id))
 ) with comment = 'Stores guest information. ';
 
-
 create table if not exists hotels(
   hotel_id uuid,
   name text,
@@ -35,7 +34,13 @@ create table if not exists hotels_by_city(
   primary key ((city_name), hotel_id)
 ) with comment = 'Queries hotels ids for the given city. ';
 
-create table if not exists available_rooms_by_hotel_date(
+create table if not exists room_by_hotel(
+    hotel_id uuid,
+    room_number int,
+    primary key ((hotel_id), room_number)
+) with comment = 'Queries rooms for the given hotel id';
+
+create table if not exists room_by_hotel_and_date(
   hotel_id uuid,
   date date,
   room_number int,

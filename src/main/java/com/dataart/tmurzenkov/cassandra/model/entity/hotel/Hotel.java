@@ -5,6 +5,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.mapping.annotations.FrozenValue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.CassandraType;
 import org.springframework.data.cassandra.mapping.Column;
@@ -20,6 +21,7 @@ import java.util.UUID;
  *
  * @author tmurzenkov
  */
+@Data
 @Table("hotels")
 public class Hotel extends BasicEntity {
     @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
@@ -36,75 +38,5 @@ public class Hotel extends BasicEntity {
     @JsonIgnore
     public MapId getCompositeId() {
         return new BasicMapId().with("id", this.id).with("name", this.name);
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Hotel hotel = (Hotel) o;
-
-        if (name != null ? !name.equals(hotel.name) : hotel.name != null) {
-            return false;
-        }
-        if (phone != null ? !phone.equals(hotel.phone) : hotel.phone != null) {
-            return false;
-        }
-        return address != null ? address.equals(hotel.address) : hotel.address == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (phone != null ? phone.hashCode() : 0);
-        result = 31 * result + (address != null ? address.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Hotel{"
-                + "id=" + id
-                + ", name='" + name + '\''
-                + ", phone='" + phone + '\''
-                + ", address=" + address
-                + '}';
     }
 }

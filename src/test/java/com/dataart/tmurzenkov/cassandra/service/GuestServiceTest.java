@@ -3,8 +3,10 @@ package com.dataart.tmurzenkov.cassandra.service;
 import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
@@ -57,6 +59,8 @@ public class GuestServiceTest {
     @Mock
     private GuestDao guestDao;
     @Mock
+    private RoomDao roomDao;
+    @Mock
     private RoomByHotelAndDateDao roomByHotelAndDateDao;
     @Mock
     private RoomByGuestAndDateDao byGuestAndDateDao;
@@ -69,19 +73,15 @@ public class GuestServiceTest {
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
         final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
+        final Room room = new Room(roomByHotelAndDate);
         expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
-        when(roomByHotelAndDateDao
-                .findOne(eq(roomByHotelAndDate.getId()), eq(roomByHotelAndDate.getDate()), eq(roomByHotelAndDate.getRoomNumber())))
-                .thenReturn(roomByHotelAndDate);
+        when(roomDao.findOne(eq(room.getCompositeId()))).thenReturn(room);
 
         sut.performBooking(bookingRequest);
 
-        verify(roomByHotelAndDateDao)
-                .findOne(eq(roomByHotelAndDate.getId()),
-                        eq(roomByHotelAndDate.getDate()),
-                        eq(roomByHotelAndDate.getRoomNumber()));
+        verify(roomDao).findOne(eq(room.getCompositeId()));
         verify(roomByHotelAndDateDao).insert(eq(roomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));

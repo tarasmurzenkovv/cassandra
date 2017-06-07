@@ -6,13 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 import org.springframework.data.cassandra.repository.MapId;
 import org.springframework.data.cassandra.repository.support.BasicMapId;
 
 import java.util.UUID;
+
+import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
+import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
 /**
  * Stores the bookings.
@@ -25,9 +27,9 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = false)
 @Table("room_by_hotel")
 public class Room extends BasicEntity {
-    @PrimaryKeyColumn(name = "hotel_id", type = PrimaryKeyType.PARTITIONED)
-    private UUID hotelId;
-    @PrimaryKeyColumn(name = "room_number", type = PrimaryKeyType.CLUSTERED)
+    @PrimaryKeyColumn(name = "hotel_id", type = PARTITIONED)
+    private UUID id;
+    @PrimaryKeyColumn(name = "room_number", type = CLUSTERED)
     private Integer roomNumber;
 
     /**
@@ -36,19 +38,19 @@ public class Room extends BasicEntity {
      * @param roomByHotelAndDate {@link RoomByHotelAndDate}
      */
     public Room(RoomByHotelAndDate roomByHotelAndDate) {
-        this.hotelId = roomByHotelAndDate.getId();
+        this.id = roomByHotelAndDate.getId();
         this.roomNumber = roomByHotelAndDate.getRoomNumber();
     }
 
     @Override
     @JsonIgnore
     public MapId getCompositeId() {
-        return BasicMapId.id("hotelId", this.hotelId)
+        return BasicMapId.id("id", this.id)
                 .with("roomNumber", this.roomNumber);
     }
 
     @Override
     public UUID getId() {
-        return this.hotelId;
+        return this.id;
     }
 }

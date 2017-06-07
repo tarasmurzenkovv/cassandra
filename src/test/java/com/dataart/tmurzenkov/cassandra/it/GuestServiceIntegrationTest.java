@@ -1,5 +1,6 @@
 package com.dataart.tmurzenkov.cassandra.it;
 
+import com.dataart.tmurzenkov.cassandra.TestUtils;
 import com.dataart.tmurzenkov.cassandra.controller.GuestController;
 import com.dataart.tmurzenkov.cassandra.controller.HotelController;
 import com.dataart.tmurzenkov.cassandra.controller.RoomController;
@@ -29,7 +30,6 @@ import static com.dataart.tmurzenkov.cassandra.TestUtils.GuestTestUtils.buildNew
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildAddress;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildHotel;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HttpResponseTest.build;
-import static com.dataart.tmurzenkov.cassandra.TestUtils.RoomTestUtils.buildRoom;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.RoomTestUtils.buildRooms;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.asJson;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.makeList;
@@ -137,7 +137,7 @@ public class GuestServiceIntegrationTest extends AbstractIntegrationTest {
         final Address hotelAddress = buildAddress();
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
         final LocalDate bookingRequestDate = LocalDate.now();
-        final Room expectedRoom = buildRoom(hotelId, roomNumber);
+        final Room expectedRoom = TestUtils.RoomTestUtils.buildRoom(hotelId, roomNumber);
         final BookingRequest bookingRequest = buildBookingRequest(hotelId, guestId, roomNumber, bookingRequestDate);
 
         final Resource<Hotel> hotelResource = resourceResourceAssemblerForHotel
@@ -181,7 +181,7 @@ public class GuestServiceIntegrationTest extends AbstractIntegrationTest {
         final Address hotelAddress = buildAddress();
         final Hotel expectedHotelToAdd = buildHotel(hotelId, hotelAddress);
         final LocalDate bookingRequestDate = LocalDate.now();
-        final Room expectedRoomByHotelAndDateToAdd = buildRoom(hotelId, roomNumber);
+        final Room expectedRoomByHotelAndDateToAdd = TestUtils.RoomTestUtils.buildRoom(hotelId, roomNumber);
         final String message = format("The following room is already booked. Room number: '%d', hotel id: '%s'",
                 roomNumber, hotelId);
         final RuntimeException exception = new IllegalArgumentException(message);

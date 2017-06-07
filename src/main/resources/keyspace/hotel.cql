@@ -44,7 +44,6 @@ create table if not exists room_by_hotel_and_date(
   hotel_id uuid,
   date date,
   room_number int,
-  is_available text,
   primary key ((hotel_id), date, room_number)
 ) with comment = 'Finds available roomByHotelAndDates by hotel/date. ';
 

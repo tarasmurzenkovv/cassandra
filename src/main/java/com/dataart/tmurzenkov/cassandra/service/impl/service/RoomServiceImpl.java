@@ -7,6 +7,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.RoomService;
 import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
+import com.dataart.tmurzenkov.cassandra.service.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.dataart.tmurzenkov.cassandra.service.util.CollectionUtils.difference;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
@@ -49,12 +51,17 @@ public class RoomServiceImpl implements RoomService {
     public Set<Room> findFreeRoomsInTheHotel(SearchRequest searchRequest) {
         Set<Room> bookedRoomsInHotel = findAllRoomsBySearchRequest(searchRequest);
         Set<Room> allRoomsInHotel = roomDao.findAllRoomsByHotelId(searchRequest.getHotelId());
-        allRoomsInHotel.removeAll(bookedRoomsInHotel);
-        if (allRoomsInHotel.isEmpty()) {
+        Set<Room> freeRooms = doMakeJoin(searchRequest, bookedRoomsInHotel, allRoomsInHotel);
+        LOGGER.info("Found the following free rooms '{}'", makeString(freeRooms));
+        return freeRooms;
+    }
+
+    private Set<Room> doMakeJoin(final SearchRequest searchRequest, final Set<Room> bookedRoomsInHotel, final Set<Room> allRoomsInHotel) {
+        Set<Room> freeRooms = difference(bookedRoomsInHotel, allRoomsInHotel);
+        if (freeRooms.isEmpty()) {
             throw new RecordNotFoundException(format("No free rooms were found for the given request '%s'", searchRequest));
         }
-        LOGGER.info("Found the following free rooms '{}'", makeString(bookedRoomsInHotel));
-        return allRoomsInHotel;
+        return freeRooms;
     }
 
     private Set<Room> findAllRoomsBySearchRequest(final SearchRequest searchRequest) {

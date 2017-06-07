@@ -2,7 +2,6 @@ package com.dataart.tmurzenkov.cassandra.model.entity.room;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.BasicEntity;
-import com.dataart.tmurzenkov.cassandra.model.entity.BookingStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -13,7 +12,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.cassandra.core.PrimaryKeyType;
-import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 import org.springframework.data.cassandra.repository.MapId;
@@ -43,8 +41,6 @@ public class RoomByHotelAndDate extends BasicEntity {
     private LocalDate date;
     @PrimaryKeyColumn(name = "room_number", type = CLUSTERED)
     private Integer roomNumber;
-    @Column("is_available")
-    private BookingStatus bookingStatus;
 
 
     /**
@@ -58,7 +54,6 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.id = id;
         this.roomNumber = roomNumber;
         this.date = localDate;
-        this.bookingStatus = BookingStatus.FREE;
     }
 
     /**
@@ -70,7 +65,6 @@ public class RoomByHotelAndDate extends BasicEntity {
         this.id = bookingRequest.getHotelId();
         this.roomNumber = bookingRequest.getRoomNumber();
         this.date = bookingRequest.getBookingDate();
-        this.bookingStatus = BookingStatus.BOOKED;
     }
 
     /**

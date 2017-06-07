@@ -1,7 +1,8 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
+import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.RoomServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
@@ -17,11 +18,24 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.util.UUID;
+
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HttpResponseTest.build;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.RoomTestUtils.buildRoom;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.asJson;
+import static com.dataart.tmurzenkov.cassandra.controller.uri.RoomUris.ADD_ROOM;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.RoomUris.GET_FREE_ROOMS;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
+import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.RECORD_ALREADY_EXISTS;
+import static java.lang.String.format;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
@@ -35,7 +49,7 @@ public class RoomControllerTest {
     @Mock
     private RoomServiceImpl roomService;
     @Mock
-    private ServiceResourceAssembler<RoomByHotelAndDate, Resource<RoomByHotelAndDate>> serviceResourceAssembler;
+    private ServiceResourceAssembler<Room, Resource<Room>> serviceResourceAssembler;
     @InjectMocks
     private RoomController sut;
     private MockMvc mockMvc;
@@ -57,50 +71,62 @@ public class RoomControllerTest {
 
     @Test
     public void shouldAddRoom() throws Exception {
-        final RoomByHotelAndDate roomByHotelAndDate = buildRoom();
-        final Resource<RoomByHotelAndDate> roomResource = new Resource<>(roomByHotelAndDate);
+        final UUID hotelId = UUID.randomUUID();
+        final Integer roomNumber = 5;
+        final Room room = buildRoom(hotelId, roomNumber);
+        final Resource<Room> roomResource = new Resource<>(room);
 
-/*        when(roomService.addRoomToHotel(eq(roomByHotelAndDate))).thenReturn(roomByHotelAndDate);
+        when(roomService.addRoomToHotel(eq(room))).thenReturn(room);
         when(serviceResourceAssembler.withController(eq(sut.getClass()))).thenReturn(serviceResourceAssembler);
-        when(serviceResourceAssembler.toResource(eq(roomByHotelAndDate))).thenReturn(roomResource);
+        when(serviceResourceAssembler.toResource(eq(room))).thenReturn(roomResource);
 
         mockMvc
-                .perform(post(ADD_ROOM).content(asJson(roomByHotelAndDate)).contentType(APPLICATION_JSON))
+                .perform(post(ADD_ROOM).content(asJson(room)).contentType(APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(content().string(asJson(roomResource)));*/
+                .andExpect(content().string(asJson(roomResource)));
+
+        verify(roomService).addRoomToHotel(eq(room));
+        verify(serviceResourceAssembler).withController(eq(sut.getClass()));
+        verify(serviceResourceAssembler).toResource(eq(room));
+    }
+
+    @Test
+    public void shouldNotAddRoomWithoutHotelId() throws Exception {
+        final UUID hotelId = null;
+        final Integer roomNumber = 5;
+        final Room room = buildRoom(hotelId, roomNumber);
+        final String nullHotelId = format("Hotel id is empty. Cannot add the the room with number '%d' for such hotel. Specify the hotel id",
+                roomNumber);
+        final RuntimeException exception = new IllegalArgumentException(nullHotelId);
+        when(roomService.addRoomToHotel(eq(room))).thenThrow(exception);
+
+        mockMvc
+                .perform(post(ADD_ROOM).content(asJson(room)).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(asJson(build(exception, QUERY_EXECUTION_EXCEPTION, BAD_REQUEST).getBody())));
+
+        verify(roomService).addRoomToHotel(eq(room));
+        verify(serviceResourceAssembler, never()).withController(eq(sut.getClass()));
+        verify(serviceResourceAssembler, never()).toResource(eq(room));
     }
 
     @Test
     public void shouldNotAddTheSameRoomTwice() throws Exception {
-/*        final RoomByHotelAndDate roomByHotelAndDate = buildRoom();
-        final String exceptionMessage = format("The roomByHotelAndDate is already inserted in DB. RoomByHotelAndDate info '%s'", roomByHotelAndDate);
-        final RuntimeException alreadyAddedRoom = new RecordExistsException(exceptionMessage);
-        final ResponseEntity response = TestUtils.HttpResponseTest.build(alreadyAddedRoom, RECORD_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
-
-        when(roomService.addRoomToHotel(eq(roomByHotelAndDate))).thenThrow(alreadyAddedRoom);
-
-        mockMvc
-                .perform(post(ADD_ROOM).content(asJson(roomByHotelAndDate)).contentType(APPLICATION_JSON))
-                .andExpect(status().isConflict())
-                .andExpect(content().string(asJson(response.getBody())));*/
-    }
-
-    @Test
-    public void shouldFindAllBookedRooms() throws Exception {
-/*        final LocalDate start = LocalDate.now();
-        final LocalDate end = start.plusDays(3);
         final UUID hotelId = UUID.randomUUID();
-        final SearchRequest searchRequest = new SearchRequest(start, end, hotelId);
-        final List<RoomByHotelAndDate> roomByHotelAndDates = buildRooms(3);
-        List<Resource<RoomByHotelAndDate>> roomAsResources = roomByHotelAndDates.stream().map(room -> new Resource<>(room)).collect(Collectors.toList());
+        final Integer roomNumber = 5;
+        final Room room = buildRoom(hotelId, roomNumber);
+        final RuntimeException exception = new RecordExistsException(format("The room is already inserted in DB. Room info '%s'", room));
 
-        when(roomService.findFreeRoomsInTheHotel(eq(searchRequest))).thenReturn(roomByHotelAndDates);
-        when(serviceResourceAssembler.toResource(eq(roomByHotelAndDates))).thenReturn(roomAsResources);
+        when(roomService.addRoomToHotel(eq(room))).thenThrow(exception);
 
         mockMvc
-                .perform(post(GET_FREE_ROOMS).content(asJson(searchRequest)).contentType(APPLICATION_JSON))
-                .andExpect(status().isFound())
-                .andExpect(content().string(asJson(roomAsResources)));*/
+                .perform(post(ADD_ROOM).content(asJson(room)).contentType(APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(asJson(build(exception, RECORD_ALREADY_EXISTS, BAD_REQUEST).getBody())));
+
+        verify(roomService).addRoomToHotel(eq(room));
+        verify(serviceResourceAssembler, never()).withController(eq(sut.getClass()));
+        verify(serviceResourceAssembler, never()).toResource(eq(room));
     }
 
     @Test

@@ -98,6 +98,20 @@ public class GuestServiceTest {
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));
     }
 
+
+    @Test
+    public void shouldNotPerformBookingRequestIfSuchRoomDoesNotExists(){
+        final Integer roomNumber = 1;
+        final BookingRequest bookingRequest = getBookingRequest(roomNumber);
+        final String exceptionMessage = format("The following room does not exists. Room number: '%d', hotel id: '%s'",
+                bookingRequest.getRoomNumber(), bookingRequest.getHotelId());
+
+        thrown.expect(RecordNotFoundException.class);
+        thrown.expectMessage(exceptionMessage);
+
+        sut.performBooking(bookingRequest);
+    }
+
     @Test
     public void shouldThrowAlreadyBookedException() {
         final Integer roomNumber = 1;
@@ -112,7 +126,6 @@ public class GuestServiceTest {
         when(byGuestAndDateDao.exists(eq(expectedRoomByGuestAndDate.getCompositeId()))).thenReturn(true);
 
         sut.performBooking(bookingRequest);
-
 
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));
     }

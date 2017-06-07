@@ -29,7 +29,7 @@ public class RoomValidatorServiceImpl implements ValidatorService<Room> {
         if (null == roomByHotelAndDate) {
             throw new IllegalArgumentException("Cannot add the the room. It is empty. ");
         }
-        if (roomByHotelAndDate.getHotelId() == null) {
+        if (roomByHotelAndDate.getId() == null) {
             final String nullHotelId =
                     format("Hotel id is empty. Cannot add the the room with number '%d' for such hotel. Specify the hotel id",
                             roomByHotelAndDate.getRoomNumber());
@@ -43,8 +43,8 @@ public class RoomValidatorServiceImpl implements ValidatorService<Room> {
 
     @Override
     public void checkIfExists(final Room room) {
-        if (null == hotelDao.findOne(room.getHotelId())) {
-            final String cannotFindHotel = format("Cannot find the hotel for the given hotel id '%s'", room.getHotelId());
+        if (null == hotelDao.findOne(room.getId())) {
+            final String cannotFindHotel = format("Cannot find the hotel for the given hotel id '%s'", room.getId());
             throw new RecordNotFoundException(cannotFindHotel);
         }
         if (roomDao.exists(room.getCompositeId())) {

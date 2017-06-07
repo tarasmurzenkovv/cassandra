@@ -100,7 +100,7 @@ public class GuestServiceTest {
 
 
     @Test
-    public void shouldNotPerformBookingRequestIfSuchRoomDoesNotExists(){
+    public void shouldNotPerformBookingRequestIfSuchRoomDoesNotExists() {
         final Integer roomNumber = 1;
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
         final String exceptionMessage = format("The following room does not exists. Room number: '%d', hotel id: '%s'",

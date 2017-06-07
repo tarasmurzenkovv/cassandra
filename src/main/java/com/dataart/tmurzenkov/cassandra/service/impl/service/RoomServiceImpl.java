@@ -7,7 +7,6 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.RoomService;
 import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
-import com.dataart.tmurzenkov.cassandra.service.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

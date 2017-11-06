@@ -2,14 +2,8 @@ package com.dataart.tmurzenkov.cassandra.service.impl.service;
 
 import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.RoomDao;
-import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
-import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
-import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
@@ -25,7 +19,6 @@ import java.util.UUID;
 import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
 import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
 import static java.lang.String.format;
-import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toList;
 
 /**

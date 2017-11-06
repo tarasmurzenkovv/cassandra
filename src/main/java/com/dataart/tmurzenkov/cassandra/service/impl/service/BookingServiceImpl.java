@@ -2,7 +2,9 @@ package com.dataart.tmurzenkov.cassandra.service.impl.service;
 
 import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
+import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByGuestAndDate;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
@@ -24,6 +26,8 @@ import static java.lang.String.valueOf;
 @Service
 public class BookingServiceImpl implements BookingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestServiceImpl.class);
+    @Autowired
+    private RoomDao roomDao;
     @Autowired
     private RoomByGuestAndDateDao roomByGuestAndDateDao;
     @Autowired
@@ -74,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
     private void checkIfExists(RoomByHotelAndDate roomByHotelAndDate) {
         final String exceptionMessage = format("The following room does not exists. Room number: '%s', hotel id: '%s',",
                 roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        if (!roomByHotelAndDateDao.exists(roomByHotelAndDate.getCompositeId())) {
+        if (!roomDao.exists(new Room(roomByHotelAndDate).getCompositeId())) {
             throw new RecordNotFoundException(exceptionMessage);
         }
     }

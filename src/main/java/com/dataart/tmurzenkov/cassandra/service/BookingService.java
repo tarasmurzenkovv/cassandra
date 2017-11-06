@@ -8,8 +8,9 @@ import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
  * @author Taras_Murzenkov
  */
 public interface BookingService {
+
     /**
-     * Registers the booking request into the database
+     * Registers the booking request into the database.
      *
      * @param bookingRequest instance of {@link BookingRequest}.
      * @return registered instance of {@link BookingRequest}
@@ -17,7 +18,7 @@ public interface BookingService {
     BookingRequest performBooking(BookingRequest bookingRequest);
 
     /**
-     * Assigns the unique indentifier for the particular instance o {@link BookingRequest}
+     * Assigns the unique identifier for the particular instance o {@link BookingRequest}.
      *
      * @param bookingRequest instance of {@link BookingRequest}
      * @return {@link Integer} the confirmation number for the specific {@link BookingRequest}

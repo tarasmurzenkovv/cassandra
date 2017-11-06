@@ -55,7 +55,9 @@ public class RoomServiceImpl implements RoomService {
         return freeRooms;
     }
 
-    private Set<Room> findFreeRoomsInHotel(final SearchRequest searchRequest, final Set<Room> bookedRoomsInHotel, final Set<Room> allRoomsInHotel) {
+    private Set<Room> findFreeRoomsInHotel(final SearchRequest searchRequest,
+                                           final Set<Room> bookedRoomsInHotel,
+                                           final Set<Room> allRoomsInHotel) {
         Set<Room> freeRooms = difference(bookedRoomsInHotel, allRoomsInHotel);
         if (freeRooms.isEmpty()) {
             throw new RecordNotFoundException(format("No free rooms were found for the given request '%s'", searchRequest));

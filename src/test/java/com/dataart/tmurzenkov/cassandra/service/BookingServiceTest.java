@@ -1,6 +1,5 @@
 package com.dataart.tmurzenkov.cassandra.service;
 
-import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
 import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.dao.RoomDao;
@@ -11,8 +10,6 @@ import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordNotFoundException;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.BookingServiceImpl;
-import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
-import com.dataart.tmurzenkov.cassandra.service.impl.validation.GuestValidatorServiceImpl;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,14 +27,21 @@ import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
+/**
+ * UTs for the {@link BookingServiceImpl}.
+ *
+ * @author Taras_Murzenkov
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class BookingServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+    @Mock
+    private RoomDao roomDao;
     @Mock
     private RoomByHotelAndDateDao roomByHotelAndDateDao;
     @Mock
@@ -51,14 +55,15 @@ public class BookingServiceTest {
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
         final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
+        final Room room = new Room(roomByHotelAndDate);
         expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
-        when(roomByHotelAndDateDao.exists(eq(roomByHotelAndDate.getCompositeId()))).thenReturn(true);
+        when(roomDao.exists(eq(room.getCompositeId()))).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 
-        verify(roomByHotelAndDateDao).exists(eq(roomByHotelAndDate.getCompositeId()));
+        verify(roomDao).exists(eq(room.getCompositeId()));
         verify(roomByHotelAndDateDao).insert(eq(roomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));

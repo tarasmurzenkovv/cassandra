@@ -1,5 +1,10 @@
 package com.dataart.tmurzenkov.cassandra.it;
 
+import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
+import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
+import com.dataart.tmurzenkov.cassandra.dao.HotelByCityDao;
+import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -24,11 +29,21 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @EnableWebMvc
 public abstract class AbstractIntegrationTest {
     @Autowired
+    protected GuestDao guestDao;
+    @Autowired
+    protected HotelDao hotelDao;
+    @Autowired
+    protected RoomByHotelAndDateDao roomByHotelAndDateDao;
+    @Autowired
+    protected HotelByCityDao hotelByCityDao;
+    @Autowired
+    protected RoomByGuestAndDateDao roomByGuestAndDateDao;
+    @Autowired
     private WebApplicationContext wac;
     protected MockMvc mockMvc;
 
     /**
-     * Inits {@link MockMvc}.
+     * Creates {@link MockMvc}.
      */
     @Before
     public void init() {
@@ -39,5 +54,11 @@ public abstract class AbstractIntegrationTest {
      * Clear all entries.
      */
     @After
-    public abstract void clearDbEntries();
+    public void clearDbEntries() {
+        guestDao.deleteAll();
+        hotelDao.deleteAll();
+        hotelByCityDao.deleteAll();
+        roomByHotelAndDateDao.deleteAll();
+        roomByGuestAndDateDao.deleteAll();
+    }
 }

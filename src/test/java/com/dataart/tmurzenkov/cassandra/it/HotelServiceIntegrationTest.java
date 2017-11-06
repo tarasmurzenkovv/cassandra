@@ -53,14 +53,6 @@ public class HotelServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private ServiceResourceAssembler<Hotel, Class<HotelController>> resourceResourceAssembler;
 
-    /**
-     * Clear all entries.
-     */
-    public void clearDbEntries() {
-        hotelDao.deleteAll();
-        hotelByCityDao.deleteAll();
-    }
-
     @Test
     public void shouldAddANewHotelToTheSystem() throws Exception {
         final UUID hotelId = UUID.randomUUID();

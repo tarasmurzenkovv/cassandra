@@ -4,11 +4,6 @@ import com.dataart.tmurzenkov.cassandra.TestUtils;
 import com.dataart.tmurzenkov.cassandra.controller.GuestController;
 import com.dataart.tmurzenkov.cassandra.controller.HotelController;
 import com.dataart.tmurzenkov.cassandra.controller.RoomController;
-import com.dataart.tmurzenkov.cassandra.dao.RoomByGuestAndDateDao;
-import com.dataart.tmurzenkov.cassandra.dao.GuestDao;
-import com.dataart.tmurzenkov.cassandra.dao.HotelByCityDao;
-import com.dataart.tmurzenkov.cassandra.dao.HotelDao;
-import com.dataart.tmurzenkov.cassandra.dao.RoomByHotelAndDateDao;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Address;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
@@ -66,27 +61,6 @@ public class GuestServiceIntegrationTest extends AbstractIntegrationTest {
     private ServiceResourceAssembler<Hotel, Class<HotelController>> resourceResourceAssemblerForHotel;
     @Autowired
     private ServiceResourceAssembler<Room, Class<RoomController>> resourceResourceAssemblerForRoom;
-    @Autowired
-    private GuestDao guestDao;
-    @Autowired
-    private HotelDao hotelDao;
-    @Autowired
-    private RoomByHotelAndDateDao roomByHotelAndDateDao;
-    @Autowired
-    private HotelByCityDao hotelByCityDao;
-    @Autowired
-    private RoomByGuestAndDateDao roomByGuestAndDateDao;
-
-    /**
-     * Clear all db entries.
-     */
-    public void clearDbEntries() {
-        guestDao.deleteAll();
-        hotelDao.deleteAll();
-        hotelByCityDao.deleteAll();
-        roomByHotelAndDateDao.deleteAll();
-        roomByGuestAndDateDao.deleteAll();
-    }
 
     @Test
     public void shouldAddANewGuest() throws Exception {

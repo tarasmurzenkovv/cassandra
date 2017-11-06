@@ -11,6 +11,7 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,20 +42,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @Api(value = "RoomByHotelAndDate operations. ", description = "REST API to manage hotel rooms in the reservation system. ")
 public class RoomController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoomController.class);
-    private final ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler;
-    private final RoomService roomService;
-
-    /**
-     * Autowire the below services into the controller.
-     *
-     * @param resourceAssembler {@link ServiceResourceAssembler}
-     * @param roomService       {@link RoomService}
-     */
-    public RoomController(ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler,
-                          RoomService roomService) {
-        this.resourceAssembler = resourceAssembler;
-        this.roomService = roomService;
-    }
+    @Autowired
+    private ServiceResourceAssembler<Room, Class<RoomController>> resourceAssembler;
+    @Autowired
+    private RoomService roomService;
 
     /**
      * Adds new hotel room to the system.

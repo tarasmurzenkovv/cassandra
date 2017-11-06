@@ -3,10 +3,8 @@ package com.dataart.tmurzenkov.cassandra.controller;
 import com.dataart.tmurzenkov.cassandra.model.dto.SearchRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.Room;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
-import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
-import com.dataart.tmurzenkov.cassandra.service.impl.service.RoomServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.RoomServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,9 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.UUID;
 
@@ -30,14 +26,13 @@ import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor
 import static java.lang.String.format;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * {@link RoomController} UTs.
@@ -45,7 +40,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author tmurzenkov
  */
 @RunWith(MockitoJUnitRunner.class)
-public class RoomControllerTest {
+public class RoomControllerTest extends AbstractControllerUnitTest<RoomController> {
     @Mock
     private RoomServiceImpl roomService;
     @Mock
@@ -59,14 +54,7 @@ public class RoomControllerTest {
      */
     @Before
     public void init() {
-        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        ObjectMapper objectMapper = new ObjectMapper();
-        mappingJackson2HttpMessageConverter.setObjectMapper(objectMapper);
-        mockMvc = standaloneSetup(sut)
-                .setControllerAdvice(new ExceptionInterceptor())
-                .setMessageConverters(mappingJackson2HttpMessageConverter)
-                .setValidator(new LocalValidatorFactoryBean())
-                .build();
+        this.mockMvc = this.init(sut);
     }
 
     @Test

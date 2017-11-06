@@ -10,6 +10,7 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,19 +41,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @Api(description = "REST API to manage hotels in the reservation system. ")
 public class HotelController {
     private static final Logger LOGGER = LoggerFactory.getLogger(HotelController.class);
-    private final HotelService hotelServiceImpl;
-    private final ServiceResourceAssembler<Hotel, Class<HotelController>> resourceAssembler;
-
-    /**
-     * Autowire the below services into the controller.
-     *
-     * @param resourceAssembler {@link ServiceResourceAssembler}
-     * @param hotelServiceImpl  {@link HotelService}
-     */
-    public HotelController(HotelService hotelServiceImpl, ServiceResourceAssembler<Hotel, Class<HotelController>> resourceAssembler) {
-        this.hotelServiceImpl = hotelServiceImpl;
-        this.resourceAssembler = resourceAssembler;
-    }
+    @Autowired
+    private HotelService hotelServiceImpl;
+    @Autowired
+    private ServiceResourceAssembler<Hotel, Class<HotelController>> resourceAssembler;
 
     /**
      * Gets all hotels in the city.

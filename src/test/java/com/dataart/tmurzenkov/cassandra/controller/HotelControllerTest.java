@@ -1,9 +1,8 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
 import com.dataart.tmurzenkov.cassandra.model.entity.hotel.Hotel;
-import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
-import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.HotelServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,31 +12,29 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.Resource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.util.List;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildEmptyHotel;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildHotel;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildHotels;
+import static com.dataart.tmurzenkov.cassandra.TestUtils.HotelTestUtils.buildEmptyHotel;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HttpResponseTest.build;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.asJson;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.ADD_HOTEL;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.HOTELS_IN_THE_CITY;
 import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static java.util.stream.Collectors.toList;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * UTs for the {@link HotelController}.
@@ -45,7 +42,7 @@ import static java.util.stream.Collectors.toList;
  * @author tmurzenkov
  */
 @RunWith(MockitoJUnitRunner.class)
-public class HotelControllerTest {
+public class HotelControllerTest extends AbstractControllerUnitTest<HotelController> {
     @Mock
     private HotelServiceImpl hotelService;
     @Mock
@@ -59,10 +56,7 @@ public class HotelControllerTest {
      */
     @Before
     public void init() {
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(sut)
-                .setControllerAdvice(new ExceptionInterceptor())
-                .build();
+        this.mockMvc = this.init(sut);
     }
 
     @Test

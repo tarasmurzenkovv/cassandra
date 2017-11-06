@@ -1,14 +1,10 @@
 package com.dataart.tmurzenkov.cassandra.controller;
 
-import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
-import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
-import com.dataart.tmurzenkov.cassandra.service.impl.service.BookingServiceImpl;
-import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,20 +12,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.hateoas.Resource;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.TestUtils.GuestTestUtils.buildBookingRequest;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.GuestTestUtils.buildNewGuest;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.HttpResponseTest.build;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.RoomTestUtils.buildRooms;
 import static com.dataart.tmurzenkov.cassandra.TestUtils.asJson;
-import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ADD_BOOKING;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ADD_GUEST;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ROOMS_BY_GUEST_AND_DATE;
 import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
@@ -46,7 +38,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * {@link GuestController}.
@@ -54,11 +45,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author tmurzenkov
  */
 @RunWith(MockitoJUnitRunner.class)
-public class GuestControllerTest {
+public class GuestControllerTest extends AbstractControllerUnitTest<GuestController> {
     @Mock
     private GuestServiceImpl guestService;
-    @Mock
-    private BookingServiceImpl bookingService;
     @Mock
     private ServiceResourceAssembler<Guest, Resource<Guest>> resourceAssembler;
     @InjectMocks
@@ -70,14 +59,7 @@ public class GuestControllerTest {
      */
     @Before
     public void init() {
-        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
-        ObjectMapper objectMapper = new ObjectMapper();
-        mappingJackson2HttpMessageConverter.setObjectMapper(objectMapper);
-        mockMvc = standaloneSetup(sut)
-                .setControllerAdvice(new ExceptionInterceptor())
-                .setMessageConverters(mappingJackson2HttpMessageConverter)
-                .setValidator(new LocalValidatorFactoryBean())
-                .build();
+        this.mockMvc = this.init(sut);
     }
 
     @Test
@@ -151,58 +133,6 @@ public class GuestControllerTest {
                 .perform(post(ADD_GUEST).content(asJson(guest)).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(asJson(build(exception, QUERY_EXECUTION_EXCEPTION, BAD_REQUEST).getBody())));
-    }
-
-    @Test
-    public void shouldExecuteBookingRequest() throws Exception {
-        final BookingRequest bookingRequest = buildBookingRequest();
-        final Resource<BookingRequest> bookingRequestResource = new Resource<>(bookingRequest);
-
-        when(bookingService.performBooking(eq(bookingRequest))).thenReturn(bookingRequest);
-
-        mockMvc
-                .perform(post(ADD_BOOKING).content(asJson(bookingRequest)).contentType(APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(asJson(bookingRequestResource)));
-    }
-
-    @Test
-    public void shouldNotExecuteBookingRequestForEmptyHotelId() throws Exception {
-        final BookingRequest bookingRequest = buildBookingRequest();
-        final String expectedContent =
-                "{\"exceptionMessage\":\"The hotel id must not be null. \",\"exceptionDescription\":\"INVALID_PARAMETERS\"}";
-        bookingRequest.setHotelId(null);
-
-        mockMvc
-                .perform(post(ADD_BOOKING).content(asJson(bookingRequest)).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(expectedContent));
-    }
-
-    @Test
-    public void shouldNotExecuteBookingRequestForEmptyRoomNumber() throws Exception {
-        final BookingRequest bookingRequest = buildBookingRequest();
-        final String expectedContent =
-                "{\"exceptionMessage\":\"The room number must not be null. \",\"exceptionDescription\":\"INVALID_PARAMETERS\"}";
-        bookingRequest.setRoomNumber(null);
-
-        mockMvc
-                .perform(post(ADD_BOOKING).content(asJson(bookingRequest)).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(expectedContent));
-    }
-
-    @Test
-    public void shouldNotExecuteBookingRequestForEmptyBookingDate() throws Exception {
-        final BookingRequest bookingRequest = buildBookingRequest();
-        final String expectedContent =
-                "{\"exceptionMessage\":\"The reservation date must not be null. \",\"exceptionDescription\":\"INVALID_PARAMETERS\"}";
-        bookingRequest.setBookingDate(null);
-
-        mockMvc
-                .perform(post(ADD_BOOKING).content(asJson(bookingRequest)).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(expectedContent));
     }
 
     @Test

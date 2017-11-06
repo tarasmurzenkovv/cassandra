@@ -39,8 +39,6 @@ public class BookingServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
     @Mock
-    private RoomDao roomDao;
-    @Mock
     private RoomByHotelAndDateDao roomByHotelAndDateDao;
     @Mock
     private RoomByGuestAndDateDao byGuestAndDateDao;
@@ -53,15 +51,14 @@ public class BookingServiceTest {
         final BookingRequest bookingRequest = getBookingRequest(roomNumber);
         final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
         final RoomByGuestAndDate expectedRoomByGuestAndDate = new RoomByGuestAndDate(bookingRequest);
-        final Room room = new Room(roomByHotelAndDate);
         expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
-        when(roomDao.exists(eq(room.getCompositeId()))).thenReturn(true);
+        when(roomByHotelAndDateDao.exists(eq(roomByHotelAndDate.getCompositeId()))).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 
-        verify(roomDao).exists(eq(room.getCompositeId()));
+        verify(roomByHotelAndDateDao).exists(eq(roomByHotelAndDate.getCompositeId()));
         verify(roomByHotelAndDateDao).insert(eq(roomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));

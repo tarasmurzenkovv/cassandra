@@ -50,8 +50,6 @@ public class HotelControllerTest {
     @Mock
     private HotelServiceImpl hotelService;
     @Mock
-    private HotelValidatorServiceImpl validatorService;
-    @Mock
     private ServiceResourceAssembler<Hotel, Resource<Hotel>> resourceAssembler;
     @InjectMocks
     private HotelController sut;

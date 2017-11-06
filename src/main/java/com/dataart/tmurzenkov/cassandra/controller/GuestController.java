@@ -4,6 +4,7 @@ import com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus;
 import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
+import com.dataart.tmurzenkov.cassandra.service.BookingService;
 import com.dataart.tmurzenkov.cassandra.service.GuestService;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -51,16 +52,21 @@ public class GuestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestController.class);
     private final ServiceResourceAssembler<Guest, Class<GuestController>> resourceAssembler;
     private final GuestService guestService;
+    private final BookingService bookingService;
 
     /**
      * Autowire the below services into the controller.
      *
      * @param resourceAssembler {@link ServiceResourceAssembler}
      * @param guestService      {@link GuestService}
+     * @param bookingService    {@link BookingService}
      */
-    public GuestController(ServiceResourceAssembler<Guest, Class<GuestController>> resourceAssembler, GuestService guestService) {
+    public GuestController(ServiceResourceAssembler<Guest, Class<GuestController>> resourceAssembler,
+                           GuestService guestService,
+                           BookingService bookingService) {
         this.resourceAssembler = resourceAssembler;
         this.guestService = guestService;
+        this.bookingService = bookingService;
     }
 
     /**
@@ -100,7 +106,7 @@ public class GuestController {
             @ApiResponse(code = BAD_REQUEST, message = "Invalid type of the parameters. ")})
     public Resource<BookingRequest> bookRoom(@RequestBody @Valid BookingRequest bookingRequest) {
         LOGGER.info("New reservation request is issued '{}'", bookingRequest);
-        return new Resource<>(guestService.performBooking(bookingRequest));
+        return new Resource<>(bookingService.performBooking(bookingRequest));
     }
 
     /**

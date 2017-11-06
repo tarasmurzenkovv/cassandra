@@ -1,6 +1,5 @@
 package com.dataart.tmurzenkov.cassandra.service;
 
-import com.dataart.tmurzenkov.cassandra.model.dto.BookingRequest;
 import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 
@@ -32,12 +31,4 @@ public interface GuestService {
      * @return {@link List} of {@link RoomByHotelAndDate}
      */
     List<RoomByHotelAndDate> findBookedRoomsForTheGuestIdAndDate(UUID guestId, LocalDate bookingDate);
-
-    /**
-     * Performs the actual reservation.
-     *
-     * @param bookingRequest {@link BookingRequest}
-     * @return {@link BookingRequest}
-     */
-    BookingRequest performBooking(BookingRequest bookingRequest);
 }

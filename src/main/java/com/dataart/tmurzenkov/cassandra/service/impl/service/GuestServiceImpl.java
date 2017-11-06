@@ -39,10 +39,6 @@ public class GuestServiceImpl implements GuestService {
     @Autowired
     private GuestDao guestDao;
     @Autowired
-    private RoomDao roomDao;
-    @Autowired
-    private RoomByHotelAndDateDao roomByHotelAndDateDao;
-    @Autowired
     private RoomByGuestAndDateDao roomByGuestAndDateDao;
     @Autowired
     private ValidatorService<Guest> guestValidatorService;
@@ -70,14 +66,6 @@ public class GuestServiceImpl implements GuestService {
         return bookedRoomByHotelAndDates;
     }
 
-    @Override
-    public BookingRequest performBooking(BookingRequest bookingRequest) {
-        validateBookingRequest(bookingRequest);
-        doInsertInGuestAndDate(bookingRequest);
-        doInsertInRoomByHotelAndDate(bookingRequest);
-        return bookingRequest;
-    }
-
     private void validateFoundRoomsByHotelAndDate(final UUID guestId,
                                                   final LocalDate bookingDate,
                                                   final List<RoomByHotelAndDate> bookedRoomByHotelAndDates) {
@@ -88,25 +76,6 @@ public class GuestServiceImpl implements GuestService {
         }
     }
 
-    private void doInsertInGuestAndDate(final BookingRequest bookingRequest) {
-        final RoomByGuestAndDate guestAndDate = new RoomByGuestAndDate(bookingRequest);
-        checkIfBooked(guestAndDate);
-        guestAndDate.setConfirmationNumber(valueOf(generateConfirmationNumber(bookingRequest)));
-        roomByGuestAndDateDao.insert(guestAndDate);
-    }
-
-    private void doInsertInRoomByHotelAndDate(final BookingRequest bookingRequest) {
-        final RoomByHotelAndDate roomByHotelAndDate = new RoomByHotelAndDate(bookingRequest);
-        checkIfExists(roomByHotelAndDate);
-        roomByHotelAndDateDao.insert(roomByHotelAndDate);
-    }
-
-    private void validateBookingRequest(BookingRequest bookingRequest) {
-        if (null == bookingRequest) {
-            throw new IllegalArgumentException("Cannot perform reservation for empty reservation request. ");
-        }
-    }
-
     private void validateSearchParameters(UUID guestId, LocalDate bookingDate) {
         if (null == guestId) {
             throw new IllegalArgumentException("Cannot perform search of the booked room for the null guest id ");
@@ -114,25 +83,5 @@ public class GuestServiceImpl implements GuestService {
         if (null == bookingDate) {
             throw new IllegalArgumentException("Cannot perform search of the booked room for the null reservation date ");
         }
-    }
-
-    private void checkIfExists(RoomByHotelAndDate roomByHotelAndDate) {
-        final String exceptionMessage = format("The following room does not exists. Room number: '%s', hotel id: '%s',",
-                roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        if (!roomDao.exists(new Room(roomByHotelAndDate).getCompositeId())) {
-            throw new RecordNotFoundException(exceptionMessage);
-        }
-    }
-
-    private void checkIfBooked(RoomByGuestAndDate roomByGuestAndDate) {
-        final String exceptionMessage = format("The following room is already booked. Room number: '%s', hotel id: '%s'",
-                roomByGuestAndDate.getRoomNumber(), roomByGuestAndDate.getHotelId());
-        if (roomByGuestAndDateDao.exists(roomByGuestAndDate.getCompositeId())) {
-            throw new RecordExistsException(exceptionMessage);
-        }
-    }
-
-    private Integer generateConfirmationNumber(BookingRequest bookingRequest) {
-        return bookingRequest.hashCode();
     }
 }

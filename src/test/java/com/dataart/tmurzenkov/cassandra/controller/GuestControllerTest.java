@@ -5,6 +5,7 @@ import com.dataart.tmurzenkov.cassandra.model.entity.Guest;
 import com.dataart.tmurzenkov.cassandra.model.entity.room.RoomByHotelAndDate;
 import com.dataart.tmurzenkov.cassandra.model.exception.RecordExistsException;
 import com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor;
+import com.dataart.tmurzenkov.cassandra.service.impl.service.BookingServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.service.GuestServiceImpl;
 import com.dataart.tmurzenkov.cassandra.service.impl.ServiceResourceAssembler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +57,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 public class GuestControllerTest {
     @Mock
     private GuestServiceImpl guestService;
+    @Mock
+    private BookingServiceImpl bookingService;
     @Mock
     private ServiceResourceAssembler<Guest, Resource<Guest>> resourceAssembler;
     @InjectMocks
@@ -155,7 +158,7 @@ public class GuestControllerTest {
         final BookingRequest bookingRequest = buildBookingRequest();
         final Resource<BookingRequest> bookingRequestResource = new Resource<>(bookingRequest);
 
-        when(guestService.performBooking(eq(bookingRequest))).thenReturn(bookingRequest);
+        when(bookingService.performBooking(eq(bookingRequest))).thenReturn(bookingRequest);
 
         mockMvc
                 .perform(post(ADD_BOOKING).content(asJson(bookingRequest)).contentType(APPLICATION_JSON))

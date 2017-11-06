@@ -50,12 +50,12 @@ public class RoomServiceImpl implements RoomService {
     public Set<Room> findFreeRoomsInTheHotel(SearchRequest searchRequest) {
         Set<Room> bookedRoomsInHotel = findAllRoomsBySearchRequest(searchRequest);
         Set<Room> allRoomsInHotel = roomDao.findAllRoomsByHotelId(searchRequest.getHotelId());
-        Set<Room> freeRooms = doMakeJoin(searchRequest, bookedRoomsInHotel, allRoomsInHotel);
+        Set<Room> freeRooms = findFreeRoomsInHotel(searchRequest, bookedRoomsInHotel, allRoomsInHotel);
         LOGGER.info("Found the following free rooms '{}'", makeString(freeRooms));
         return freeRooms;
     }
 
-    private Set<Room> doMakeJoin(final SearchRequest searchRequest, final Set<Room> bookedRoomsInHotel, final Set<Room> allRoomsInHotel) {
+    private Set<Room> findFreeRoomsInHotel(final SearchRequest searchRequest, final Set<Room> bookedRoomsInHotel, final Set<Room> allRoomsInHotel) {
         Set<Room> freeRooms = difference(bookedRoomsInHotel, allRoomsInHotel);
         if (freeRooms.isEmpty()) {
             throw new RecordNotFoundException(format("No free rooms were found for the given request '%s'", searchRequest));

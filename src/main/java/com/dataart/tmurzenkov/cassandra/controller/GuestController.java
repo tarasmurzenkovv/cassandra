@@ -34,7 +34,7 @@ import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ROOMS_BY
 import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.BAD_REQUEST;
 import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.CONFLICT;
 import static com.dataart.tmurzenkov.cassandra.controller.status.HttpStatus.NOT_FOUND;
-import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.util.DateUtils.format;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;

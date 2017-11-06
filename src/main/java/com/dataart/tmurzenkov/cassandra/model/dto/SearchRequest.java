@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.util.DateUtils.format;
 import static java.lang.String.format;
 
 /**

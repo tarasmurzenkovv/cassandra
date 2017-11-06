@@ -16,8 +16,8 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.service.util.CollectionUtils.difference;
-import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
+import static com.dataart.tmurzenkov.cassandra.util.CollectionUtils.difference;
+import static com.dataart.tmurzenkov.cassandra.util.StringUtils.makeString;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 

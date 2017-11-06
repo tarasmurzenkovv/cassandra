@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.util.DateUtils.format;
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
 import static java.util.Collections.emptyList;

@@ -16,8 +16,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
-import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.makeString;
+import static com.dataart.tmurzenkov.cassandra.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.util.StringUtils.makeString;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 

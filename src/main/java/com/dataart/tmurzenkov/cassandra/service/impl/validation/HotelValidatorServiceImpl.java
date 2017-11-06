@@ -8,7 +8,7 @@ import com.dataart.tmurzenkov.cassandra.service.ValidatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static com.dataart.tmurzenkov.cassandra.service.util.StringUtils.isEmpty;
+import static com.dataart.tmurzenkov.cassandra.util.StringUtils.isEmpty;
 import static java.lang.String.format;
 
 /**

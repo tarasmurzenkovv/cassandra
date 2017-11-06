@@ -34,7 +34,7 @@ import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ADD_GUES
 import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ROOMS_BY_GUEST_AND_DATE;
 import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.QUERY_EXECUTION_EXCEPTION;
 import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.RECORD_ALREADY_EXISTS;
-import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.util.DateUtils.format;
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;

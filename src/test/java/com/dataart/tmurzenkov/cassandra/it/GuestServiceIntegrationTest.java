@@ -34,7 +34,7 @@ import static com.dataart.tmurzenkov.cassandra.controller.uri.GuestUris.ROOMS_BY
 import static com.dataart.tmurzenkov.cassandra.controller.uri.HotelUris.ADD_HOTEL;
 import static com.dataart.tmurzenkov.cassandra.controller.uri.RoomUris.ADD_ROOM;
 import static com.dataart.tmurzenkov.cassandra.service.impl.ExceptionInterceptor.Constants.RECORD_ALREADY_EXISTS;
-import static com.dataart.tmurzenkov.cassandra.service.util.DateUtils.format;
+import static com.dataart.tmurzenkov.cassandra.util.DateUtils.format;
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
 import static java.util.stream.Collectors.toList;

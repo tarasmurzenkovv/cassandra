@@ -1,4 +1,4 @@
-package com.dataart.tmurzenkov.cassandra.service.util;
+package com.dataart.tmurzenkov.cassandra.util;
 
 import java.util.Set;
 import java.util.stream.Collectors;

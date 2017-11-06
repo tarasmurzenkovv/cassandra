@@ -77,11 +77,11 @@ public class GuestServiceTest {
         expectedRoomByGuestAndDate.setConfirmationNumber(valueOf(bookingRequest.hashCode()));
 
         when(byGuestAndDateDao.insert(any(RoomByGuestAndDate.class))).thenReturn(expectedRoomByGuestAndDate);
-        when(roomDao.findOne(eq(room.getCompositeId()))).thenReturn(room);
+        when(roomDao.exists(eq(room.getCompositeId()))).thenReturn(true);
 
         sut.performBooking(bookingRequest);
 
-        verify(roomDao).findOne(eq(room.getCompositeId()));
+        verify(roomDao).exists(eq(room.getCompositeId()));
         verify(roomByHotelAndDateDao).insert(eq(roomByHotelAndDate));
         verify(byGuestAndDateDao).insert(eq(expectedRoomByGuestAndDate));
         verify(byGuestAndDateDao, never()).save(any(RoomByGuestAndDate.class));

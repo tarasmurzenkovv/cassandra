@@ -119,7 +119,7 @@ public class GuestServiceImpl implements GuestService {
     private void checkIfExists(RoomByHotelAndDate roomByHotelAndDate) {
         final String exceptionMessage = format("The following room does not exists. Room number: '%s', hotel id: '%s',",
                 roomByHotelAndDate.getRoomNumber(), roomByHotelAndDate.getId());
-        if (null == roomDao.findOne(new Room(roomByHotelAndDate).getCompositeId())) {
+        if (!roomDao.exists(new Room(roomByHotelAndDate).getCompositeId())) {
             throw new RecordNotFoundException(exceptionMessage);
         }
     }
